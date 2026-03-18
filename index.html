@@ -6,7 +6,7 @@
     <title>王昱程 - 项目作品集</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -88,10 +88,11 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 21px;
-            font-weight: 600;
+            font-family: 'Dancing Script', cursive;
+            font-size: 26px;
+            font-weight: 700;
             color: var(--text-primary);
-            letter-spacing: -0.021em;
+            letter-spacing: 0.02em;
         }
 
         .nav-avatar {
@@ -644,7 +645,8 @@
 
         .cert-preview {
             width: 100%;
-            aspect-ratio: 16/10;
+            min-height: 150px;
+            max-height: 250px;
             background: var(--bg-primary);
             border-radius: 12px;
             margin-top: 12px;
@@ -654,6 +656,24 @@
             color: var(--text-tertiary);
             font-size: 14px;
             border: 2px dashed var(--bg-secondary);
+            overflow: hidden;
+        }
+
+        .cert-preview img {
+            width: 100%;
+            height: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+        }
+
+        .cert-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: var(--text-tertiary);
         }
 
         /* Side Panel */
@@ -1089,11 +1109,106 @@
             border-radius: 20px;
             box-shadow: var(--shadow-sm);
             transition: all 0.3s var(--ease-spring);
+            cursor: grab;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .skill-category:active {
+            cursor: grabbing;
+        }
+
+        .skill-category.dragging {
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            transition: none;
         }
 
         .skill-category:hover {
-            transform: translateY(-4px);
             box-shadow: var(--shadow-md);
+        }
+
+        /* 技能卡片入场动画 */
+        .skill-category {
+            opacity: 0;
+            transform: translateY(60px) rotateX(25deg) rotateY(-10deg);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .skill-category.visible {
+            opacity: 1;
+            transform: translateY(0) rotateX(0) rotateY(0);
+        }
+
+        .skill-category.enter-from-top {
+            animation: skillEnterFromTop 0.8s var(--ease-out-expo) forwards;
+        }
+
+        .skill-category.enter-from-bottom {
+            animation: skillEnterFromBottom 0.8s var(--ease-out-expo) forwards;
+        }
+
+        .skill-category.exit-to-top {
+            animation: skillExitToTop 0.5s var(--ease-out-expo) forwards;
+        }
+
+        .skill-category.exit-to-bottom {
+            animation: skillExitToBottom 0.5s var(--ease-out-expo) forwards;
+        }
+
+        @keyframes skillEnterFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-80px) rotateX(-30deg) rotateY(10deg);
+            }
+            60% {
+                opacity: 1;
+                transform: translateY(10px) rotateX(5deg) rotateY(-2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0) rotateY(0);
+            }
+        }
+
+        @keyframes skillEnterFromBottom {
+            0% {
+                opacity: 0;
+                transform: translateY(80px) rotateX(30deg) rotateY(-10deg);
+            }
+            60% {
+                opacity: 1;
+                transform: translateY(-10px) rotateX(-5deg) rotateY(2deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0) rotateY(0);
+            }
+        }
+
+        @keyframes skillExitToTop {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0) rotateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-60px) rotateX(15deg) rotateY(-5deg);
+            }
+        }
+
+        @keyframes skillExitToBottom {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotateX(0) rotateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(60px) rotateX(-15deg) rotateY(5deg);
+            }
         }
 
         .skill-category-title {
@@ -1418,7 +1533,7 @@
                         <div class="highlight-card-content">
                             <div class="highlight-card-text">
                                 <div class="highlight-label">语言能力</div>
-                                <div class="highlight-value">雅思 7.0 (8 / 7.5 / 6.5 / 6.5)</div>
+                                <div class="highlight-value">雅思 7.0 (8 / 7.5 / 6 / 6)</div>
                             </div>
                             <div class="highlight-card-arrow">→</div>
                         </div>
@@ -1637,6 +1752,11 @@
                     const ry = -10 - Math.random() * 50;
                     this.droplets.push(new InkRaindrop(rx, ry));
                 }
+            }
+
+            // 墨水涟漚效果
+            ripple(x, y) {
+                this.droplets.push(new InkRipple(x, y));
             }
         }
 
@@ -1964,6 +2084,70 @@
             }
         }
 
+        // 墨水晕染 - 简约优雅的水墨晕开
+        class InkRipple {
+            constructor(x, y, width, height) {
+                this.x = x;
+                this.y = y;
+                this.age = 0;
+                this.maxAge = 70;
+                this.maxRadius = 90 + Math.random() * 30;
+            }
+
+            update() {
+                this.age++;
+            }
+
+            draw(ctx) {
+                if (this.age > this.maxAge) return;
+                
+                const progress = this.age / this.maxAge;
+                const radius = this.maxRadius * (1 - Math.pow(1 - progress, 3));
+                const alpha = 0.45 * (1 - progress);
+                
+                if (alpha <= 0.01 || radius < 10) return;
+                
+                // 绘制主体 - 一个大的渐变圆
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, radius
+                );
+                gradient.addColorStop(0, `rgba(30, 30, 30, ${alpha * 1.2})`);
+                gradient.addColorStop(0.15, `rgba(45, 45, 45, ${alpha * 0.9})`);
+                gradient.addColorStop(0.4, `rgba(70, 70, 70, ${alpha * 0.5})`);
+                gradient.addColorStop(0.7, `rgba(100, 100, 100, ${alpha * 0.2})`);
+                gradient.addColorStop(1, `rgba(140, 140, 140, 0)`);
+                
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // 添加一些不规则的墨迹，让边缘更自然
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + progress * 0.5;
+                    const dist = radius * (0.6 + Math.random() * 0.3);
+                    const size = radius * (0.15 + Math.random() * 0.1);
+                    
+                    const sx = this.x + Math.cos(angle) * dist;
+                    const sy = this.y + Math.sin(angle) * dist;
+                    
+                    const spotGradient = ctx.createRadialGradient(sx, sy, 0, sx, sy, size);
+                    spotGradient.addColorStop(0, `rgba(50, 50, 50, ${alpha * 0.4})`);
+                    spotGradient.addColorStop(1, `rgba(100, 100, 100, 0)`);
+                    
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, size, 0, Math.PI * 2);
+                    ctx.fillStyle = spotGradient;
+                    ctx.fill();
+                }
+            }
+
+            isDead() {
+                return this.age > this.maxAge;
+            }
+        }
+
         // 打字机效果
         class Typewriter {
             constructor(element, text, speed = 100, delay = 1000) {
@@ -2003,33 +2187,32 @@
                 title: '教育背景',
                 items: [
                     { title: '本科学位证书', desc: '西安交通大学 · 智能制造工程专业', date: '2021.09 - 2025.06', preview: '毕业证书.jpg' },
-                    { title: '学士学位证', desc: '工学学士', date: '2025.06', preview: '学位证.jpg' },
-                    { title: '在校成绩单', desc: '平均分 84.44，专业前 20%', date: '2021-2025', preview: '成绩单.jpg' }
+                    { title: '短期交换项目证书', desc: '帝国理工学院', date: '2025.02', preview: '图片8.png' }
                 ]
             },
             language: {
                 title: '语言能力',
                 items: [
-                    { title: '雅思 IELTS', desc: '总分 7.0（听力 7.5 · 阅读 7.0 · 写作 6.5 · 口语 6.5）', date: '2024.03', preview: '雅思成绩单.jpg' },
-                    { title: '大学英语六级 CET-6', desc: '通过', date: '2022.06', preview: 'cet6.jpg' },
-                    { title: '大学英语四级 CET-4', desc: '通过', date: '2021.12', preview: 'cet4.jpg' }
+                    { title: '雅思 IELTS', desc: '总分 7.0（听力 8 · 阅读 7.5 · 写作 6 · 口语 6）', date: '2025.09', preview: '雅思成绩单.jpg' },
                 ]
             },
             awards: {
                 title: '荣誉奖项',
                 items: [
-                    { title: '中国大学生工程实践与创新能力大赛', desc: '智能·环境道路赛道 国家级一等奖', date: '2024.11', preview: '工创大赛证书.jpg' },
-                    { title: 'RoboCup 机器人世界杯', desc: '家庭组比赛 国家级三等奖', date: '2024.05', preview: 'robocup证书.jpg' },
-                    { title: '省级大学生创新创业项目', desc: '首席负责人，项目结颜优秀', date: '2023.06', preview: '创新项目.jpg' },
-                    { title: '学业奖学金', desc: '校级奖学金', date: '2022-2024', preview: '奖学金.jpg' }
+                    { title: '中国大学生工程实践与创新能力大赛', desc: '智能垃圾分类赛道 国家级一等奖', date: '2024.11', preview: '工创大赛证书.jpg' },
+                    { title: 'RoboCup 机器人世界杯', desc: '农业采摘机器人国家级三等奖', date: '2024.05', preview: 'robocup证书.jpg' },
+                    { title: '省级大学生创新创业项目', desc: '负责人，项目结题', date: '2023.06', preview: '创新项目.jpg' },
+                    { title: '智能网联汽车虚拟仿真赛道', desc: '负责人，省级二等奖', date: '2023.06', preview: '省2.jpg' },
+                    { title: '社会活动先进个人', desc: '校级表彰', date: '2025.12', preview: '表彰.jpg' }
                 ]
             },
             work: {
-                title: '学生工作',
+                title: '社团活动 & 社会活动',
                 items: [
-                    { title: '机器人俱乐部 技术部长', desc: '负责机器人竞赛培训与技术支持', date: '2022.09 - 2024.06', preview: '机器人部.jpg' },
-                    { title: '学生会 科技部干事', desc: '组织科技类活动与比赛', date: '2022.09 - 2023.06', preview: '学生会.jpg' },
-                    { title: '班级学习委员', desc: '协助学习事务与资料整理', date: '2021.09 - 2022.06', preview: '学习委员.jpg' }
+                    { title: '西安交通大学慧鱼机器人创意活动队 副队长', desc: '负责机器人竞赛电控培训与技术支持', date: '2025.08', preview: '慧鱼.jpg' },
+                    { title: 'Datawhale 社区志愿者', desc: '参与线上组队学习助教 & 线下AI Hackathon志愿者', date: '2025.9 - now', preview: '参与者.jpg' },
+                    { title: '积极参与各项组队学习等，自驱力强', desc: '主动深入学习未知领域知识', date: '2025.9 - now', preview: '学习者1.jpg' },
+                    { title: '学习时严肃认真', desc: '获得优秀学习者等称号', date: '2025.9 - now', preview: '学习者2.jpg' }
                 ]
             }
         };
@@ -2077,7 +2260,7 @@
                     <div class="cert-item-desc">${item.desc}</div>
                     <div class="cert-item-date">${item.date}</div>
                     <div class="cert-preview">
-                        <span>📷 ${item.preview}</span>
+                        <img src="${item.preview}" alt="${item.title}" loading="lazy" onerror="this.parentElement.innerHTML='<span class=\'cert-placeholder\'>📄 ${item.preview}</span>'">
                     </div>
                 </div>
             `).join('');
@@ -2101,34 +2284,36 @@
             projects: [
                 {
                     title: '毕业设计',
-                    shortTitle: '基于VLA实现的机械臂',
+                    shortTitle: '基于 VLA 实现的机械臂',
                     description: '基于 VLA 模型的实现路径研究。对当前主流 VLA 模型进行实验验证，并进行架构调整与加入更多模态进行泛化能力加强探索。',
                     tags: ['Python', 'PyTorch', 'VLA', '具身智能', '机械臂控制'],
                     icon: '🦾',
                     award: null,
                     media: [
-                        { src: '图片1.png', caption: 'VLA模型架构设计图，展示了视觉-语言-动作三模态的融合流程' },
-                        { src: '图片8.png', caption: '机械臂实物部署测试，在真实环境中验证模型效果' }
+                        { src: '实验视频.mp4', caption: '完成 OpenVLA、 SmolVLA 等 VLA 模型的环境搭建、 端到端推理验证与效果对标。' },
+                        { src: '图片.png', caption: '针对典型机械臂操作任务， 复现了论文核心效果， 机械臂实物部署测试，目前正在推进模型泛化能力的优化实验。' }
                     ]
                 },
                 {
                     title: '工程实践与创新大赛',
-                    shortTitle: '工创大赛',
-                    description: '基于 YOLOv11-obb 和轨迹追踪算法训练的垃圾分类算法，并部署于树莓派与 MaixCam 与 STM32 联动实现垃圾的检测、分类、抓取、压缩。',
+                    shortTitle: '智能垃圾分类系统',
+                    description: '针对垃圾分类生活场景， 开发集检测-分类-追踪定位-抓取-压缩于一体的全流程系统。基于 YOLOv11-obb 与轨迹追踪算法构建目标检测模型， 完成数据集标注、 模型训练与微调， 部署于树莓派、 MaixCam 等边缘设备， 与 STM32 联动实现视觉-机械闭环控制。',
                     tags: ['Python', 'YOLO', '神经网络', 'STM32', '嵌入式'],
                     icon: '🚀',
                     award: '国家级一等奖',
                     media: [
                         { src: 'sort.jpg', caption: '智能垃圾分类系统整体外观，自主设计的机械结构与控制电路' },
-                        { src: 'sort1.jpg', caption: 'YOLOv11-obb目标检测效果，可识别多种垃圾类别与位置' },
-                        { src: 'sort2.jpg', caption: '树莓派与STM32协同工作，实现端到端的垃圾自动分拣' }
+                        { src: 'sort1.jpg', caption: '智能垃圾分类系统整体外观，自主设计的机械结构与控制电路' },
+                        { src: 'sort3.jpg', caption: 'YOLOv11-obb训练过程指标曲线，模型趋于拟合' },
+                        { src: 'sort2.jpg', caption: 'YOLOv11-obb目标检测效果，可识别多种垃圾类别与位置'},
+                        { src: 'sort4.jpg', caption: '比赛现场集体合影照片'}
                     ]
                 },
                 {
-                    title: 'RoboCup 机器人世界杯',
+                    title: 'RoboCup 机器人世界杯中国赛',
                     shortTitle: 'RoboCup',
-                    description: '对自己设计的抓取机械臂进行控制，与视觉 OpenCV、底盘控制结合实现定位、抓取、放置的小车功能。',
-                    tags: ['C', 'Python', 'OpenCV', '电机/舵机控制', 'ROS'],
+                    description: '面向农业采摘场景抓取需求， 开发集自主定位、 视觉识别、 机械抓取于一体的移动操作小车。基于 OpenCV 构建视觉识别能力，完成相机标定、目标检测与坐标转换；开发机械臂运动控制算法，实现目标的精准抓取与放置',
+                    tags: ['C', 'OpenCV', '电机/舵机控制'],
                     icon: '🤖',
                     award: '国家级三等奖',
                     media: [
@@ -2139,15 +2324,15 @@
                 {
                     title: '省级创新创业项目',
                     shortTitle: '创新创业',
-                    description: '风力发电机智能运维。基于 CNN-LSTM-multi attention 对风电发电机主轴故障进行识别并预测剩余寿命。',
+                    description: '针对工业装备时序数据故障识别难、寿命预测精度低的痛点，开展基于深度学习的工业装备智能运维研究。完成大规模时序数据清洗、特征提取与预处理；构建 CNN-LSTM-Multi Attention 融合模型，实现故障分类与剩余寿命预测；开发配套可视化交互界面。',
                     tags: ['Python', '神经网络', '机器学习', '三维建模', '数据分析'],
                     icon: '⚡',
                     award: null,
                     media: [
-                        { src: 'wind-turbine2.jpg', caption: '风力发电机主轴监测数据可视化分析界面' },
-                        { src: 'wind-turbine1.jpg', caption: 'CNN-LSTM-Attention模型架构与训练过程' },
-                        { src: 'wind-turbine.jpg', caption: '主轴故障预测结果展示，剩余寿命预测精度达到90%以上' },
-                        { src: 'wind-turbine3.jpg', caption: '三维建模展示风力发电机内部结构' }
+                        { src: 'wind-turbine2.jpg', caption: '省级大学生创新创业项目展示' },
+                        { src: 'wind-turbine1.jpg', caption: '数据清洗与预处理、特征选择过程' },
+                        { src: 'wind-turbine.jpg', caption: '风力发电机主轴监测数据可视化分析界面 & 三维建模展示风力发电机内部结构' },
+                        { src: 'wind-turbine3.jpg', caption: '最终输出特征预测与主轴寿命预测曲线示意' }
                     ]
                 },
                 {
@@ -2159,14 +2344,18 @@
                     award: null,
                     media: [
                         { src: 'paper-assistant-1.jpg', caption: 'Paper Insights 首页，支持 DOI、ArXiv ID 和论文标题多种检索方式' },
-                        { src: 'paper-assistant-2.jpg', caption: '论文分析结果页，展示 AI 生成的智能摘要与参考文献排序' },
-                        { src: 'paper-assistant-3.jpg', caption: 'Daily Knowledge Briefing 功能，聚合多源学术资讯并 AI 总结' }
+                        { src: 'paper-assistant-2.jpg', caption: '论文分析结果页，展示 AI 生成的智能摘要与引用本文献的文章排序，为拓展阅读提供方向' },
+                        { src: 'paper-assistant-3.jpg', caption: 'AI根据使用者分层提供阅读推荐' },
+                        { src: 'paper-assistant-4.jpg', caption: 'Daily Knowledge Briefing 功能，聚合多源学术资讯并 AI 总结' },
+                        { src: 'paper-assistant-5.jpg', caption: '支持多信息源检索，并判断信息源是否正常；支持广告过滤' },
+                        { src: 'paper-assistant-6.jpg', caption: '支持微信公众号接入，通过weRSS制作个人订阅库' },
+                        { src: 'paper-assistant-7.jpg', caption: '支持自定义信息源' },
                     ]
                 }
             ],
             skills: [
                 { category: '编程语言', items: ['Python', 'C', 'MATLAB'] },
-                { category: '机器人 & AI', items: ['ROS2', 'PyTorch', 'OpenCV', 'VLA 模型'] },
+                { category: 'Deeplearning & AI', items: ['PyTorch', 'OpenCV', 'VLA','CNN','Transformer'] },
                 { category: '硬件 & 工具', items: ['STM32', 'SolidWorks', 'Git', 'Linux'] }
             ]
         };
@@ -2307,6 +2496,89 @@
             });
 
             headers.forEach(header => observer.observe(header));
+        }
+
+        // 技能卡片入场动画 - 倾斜弹入 + 水墨晕染（完美闭环）
+        function initSkillsReveal() {
+            const skillsSection = document.getElementById('skills');
+            const skillCards = document.querySelectorAll('.skill-category');
+            let scrollDirection = 'down';
+            let isInViewport = false;
+            let hasAnimated = false;
+            
+            // 监听滚动方向
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !isInViewport) {
+                        // 进入视口
+                        isInViewport = true;
+                        
+                        if (!hasAnimated) {
+                            hasAnimated = true;
+                            
+                            // 清除离场状态
+                            skillCards.forEach(card => {
+                                card.classList.remove('exit-to-top', 'exit-to-bottom');
+                            });
+                            
+                            // 依次弹入
+                            skillCards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    if (scrollDirection === 'down') {
+                                        card.classList.add('enter-from-bottom');
+                                    } else {
+                                        card.classList.add('enter-from-top');
+                                    }
+                                    
+                                    // 触发水墨晕染
+                                    if (inkSystem) {
+                                        const rect = card.getBoundingClientRect();
+                                        setTimeout(() => {
+                                            inkSystem.ripple(rect.left + rect.width/2, rect.top + rect.height/2);
+                                        }, 200);
+                                    }
+                                }, index * 150);
+                            });
+                        }
+                    } else if (!entry.isIntersecting && isInViewport) {
+                        // 离开视口
+                        isInViewport = false;
+                        
+                        // 依次离场
+                        skillCards.forEach((card, index) => {
+                            setTimeout(() => {
+                                card.classList.remove('enter-from-top', 'enter-from-bottom');
+                                
+                                if (scrollDirection === 'down') {
+                                    card.classList.add('exit-to-top');
+                                } else {
+                                    card.classList.add('exit-to-bottom');
+                                }
+                            }, index * 80);
+                        });
+                        
+                        // 重置动画状态，允许下次进入
+                        setTimeout(() => {
+                            hasAnimated = false;
+                            skillCards.forEach(card => {
+                                card.classList.remove('exit-to-top', 'exit-to-bottom');
+                            });
+                        }, 1000);
+                    }
+                });
+            }, {
+                threshold: 0.2,
+                rootMargin: '-15% 0px -15% 0px'
+            });
+            
+            observer.observe(skillsSection);
         }
 
         // Open Side Panel
@@ -2463,6 +2735,78 @@
                     </div>
                 `;
                 container.appendChild(category);
+                
+                // 添加微拖动功能
+                initSkillCardDrag(category);
+            });
+        }
+
+        // 技能卡片微拖动
+        function initSkillCardDrag(card) {
+            let isDragging = false;
+            let startX, startY, initialX = 0, initialY = 0;
+            let currentX = 0, currentY = 0;
+            const maxDrag = 30; // 最大拖动距离
+            
+            card.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                card.classList.add('dragging');
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                
+                // 限制拖动范围
+                currentX = Math.max(-maxDrag, Math.min(maxDrag, initialX + deltaX));
+                currentY = Math.max(-maxDrag, Math.min(maxDrag, initialY + deltaY));
+                
+                card.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                
+                // 拖动时产生墨水涟漚（从卡片四周浸透出去）
+                if (inkSystem && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+                    const rect = card.getBoundingClientRect();
+                    // 根据拖动方向确定涟漚位置（在卡片边缘）
+                    let rippleX = rect.left + rect.width / 2;
+                    let rippleY = rect.top + rect.height / 2;
+                    
+                    // 偏移到边缘，让涟漚从卡片周围浸开
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        // 水平拖动
+                        rippleX = deltaX > 0 ? rect.right : rect.left;
+                        rippleY = rect.top + rect.height / 2 + (Math.random() - 0.5) * rect.height * 0.6;
+                    } else {
+                        // 垂直拖动
+                        rippleX = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 0.6;
+                        rippleY = deltaY > 0 ? rect.bottom : rect.top;
+                    }
+                    
+                    // 更高频率，更明显的涟漚
+                    if (Math.random() > 0.5) {
+                        inkSystem.ripple(rippleX, rippleY, rect.width, rect.height);
+                    }
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                card.classList.remove('dragging');
+                
+                // 弹回原位
+                card.style.transition = 'transform 0.5s var(--ease-spring)';
+                card.style.transform = 'translate(0, 0)';
+                currentX = 0;
+                currentY = 0;
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s var(--ease-spring)';
+                }, 500);
             });
         }
 
@@ -2506,7 +2850,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const typewriterText = document.getElementById('typewriter-text');
             if (typewriterText) {
-                new Typewriter(typewriterText, '智能制造工程 · 具身智能探索者', 80, 800).start();
+                new Typewriter(typewriterText, '智能制造工程 · Focus on Embodied Intelligence', 80, 800).start();
             }
 
             // 启动水墨效果 - 仅在非触摸设备
@@ -2520,6 +2864,7 @@
             initBidirectionalScrollAnimation();
             initAboutReveal();
             initSectionHeadersReveal();
+            initSkillsReveal(); // 技能卡片入场动画
             initMobileMenu();
             initSmoothScroll();
         });
@@ -2539,11 +2884,29 @@
                 });
             });
 
-            // 2. 卡片悬停时墨水旋转进入
-            document.querySelectorAll('.highlight-card, .skill-category').forEach(card => {
+            // 2. 证书卡片悬停时旋涡，技能卡片悬停时涟漚
+            document.querySelectorAll('.highlight-card').forEach(card => {
                 card.addEventListener('mouseenter', (e) => {
                     const rect = card.getBoundingClientRect();
                     inkSystem.vortex(rect.left + rect.width/2, rect.top + rect.height/2, 0.8);
+                });
+            });
+            
+            document.querySelectorAll('.skill-category').forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    // 技能卡片悬停时从四角产生涟漚
+                    const corners = [
+                        { x: rect.left + 10, y: rect.top + 10 },
+                        { x: rect.right - 10, y: rect.top + 10 },
+                        { x: rect.left + 10, y: rect.bottom - 10 },
+                        { x: rect.right - 10, y: rect.bottom - 10 }
+                    ];
+                    corners.forEach((corner, i) => {
+                        setTimeout(() => {
+                            inkSystem.ripple(corner.x, corner.y, rect.width, rect.height);
+                        }, i * 80);
+                    });
                 });
             });
 
