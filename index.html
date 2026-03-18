@@ -770,16 +770,23 @@
 
         .project-panel-image-wrapper {
             width: 100%;
-            aspect-ratio: 16/10;
+            min-height: 200px;
+            max-height: 400px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f7 0%, #e8e8ed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .project-panel-image-wrapper img,
         .project-panel-image-wrapper video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 400px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         .project-panel-image-caption {
@@ -1261,7 +1268,9 @@
             .project-orb-title { font-size: 11px; }
 
             .project-panel { max-width: 100%; }
-            .project-panel-image-wrapper { aspect-ratio: 4/3; }
+            .project-panel-image-wrapper { min-height: 150px; max-height: 300px; }
+            .project-panel-image-wrapper img,
+            .project-panel-image-wrapper video { max-height: 300px; }
             .project-panel-info { padding: 24px; }
             .project-panel-info-title { font-size: 20px; }
 
@@ -1282,7 +1291,7 @@
         <div class="nav-content">
             <div class="nav-logo">
                 <img src="avatar.jpg" alt="头像" class="nav-avatar" onerror="this.style.display='none'">
-                王昱程
+                Yucheng Wang
             </div>
             <button class="mobile-menu-btn">☰</button>
             <ul class="nav-links">
@@ -1313,16 +1322,16 @@
             
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <div class="hero-stat-number">4+</div>
+                    <div class="hero-stat-number">5+</div>
                     <div class="hero-stat-label">竞赛获奖</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">5</div>
+                    <div class="hero-stat-number">5+</div>
                     <div class="hero-stat-label">完整项目</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">84.44</div>
-                    <div class="hero-stat-label">均分成绩</div>
+                    <div class="hero-stat-number">87.44</div>
+                    <div class="hero-stat-label">校园成绩</div>
                 </div>
             </div>
         </div>
@@ -1333,7 +1342,7 @@
         <div class="section-header" id="projects-header">
             <p class="section-eyebrow">Selected Works</p>
             <h2 class="section-title">项目作品</h2>
-            <p class="section-description">点击下方的项目球体，探索我的作品详情</p>
+            <p class="section-description">点击下方的项目，查看我的作品详情</p>
         </div>
         
         <div class="projects-container">
@@ -1409,7 +1418,7 @@
                         <div class="highlight-card-content">
                             <div class="highlight-card-text">
                                 <div class="highlight-label">语言能力</div>
-                                <div class="highlight-value">雅思 7.0 · CET-6</div>
+                                <div class="highlight-value">雅思 7.0 (8 / 7.5 / 6.5 / 6.5)</div>
                             </div>
                             <div class="highlight-card-arrow">→</div>
                         </div>
@@ -1418,7 +1427,7 @@
                         <div class="highlight-card-content">
                             <div class="highlight-card-text">
                                 <div class="highlight-label">荣誉奖项</div>
-                                <div class="highlight-value">工程实践大赛国一 · RoboCup 国三</div>
+                                <div class="highlight-value">工程实践大赛国一 · RoboCup 国三 等等</div>
                             </div>
                             <div class="highlight-card-arrow">→</div>
                         </div>
@@ -1599,7 +1608,7 @@
             // 全局联动方法
             
             // 墨水爆发效果
-            burst(x, y, count = 8, spread = 60) {
+            burst(x, y, count = 20, spread = 100) {
                 for (let i = 0; i < count; i++) {
                     const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
                     const dist = Math.random() * spread;
@@ -1611,7 +1620,7 @@
 
             // 墨水旋涡效果
             vortex(x, y, force = 1) {
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 12; i++) {
                     this.droplets.push(new InkVortex(x, y, force));
                 }
             }
@@ -1622,7 +1631,7 @@
             }
 
             // 墨水雨效果
-            rain(x, width = 100, intensity = 5) {
+            rain(x, width = 100, intensity = 12) {
                 for (let i = 0; i < intensity; i++) {
                     const rx = x + (Math.random() - 0.5) * width;
                     const ry = -10 - Math.random() * 50;
@@ -2052,6 +2061,14 @@
                 ripple.remove();
             }, 500);
 
+            // 触发墨水特效（在卡片中心）
+            if (inkSystem) {
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                inkSystem.burst(centerX, centerY, 25, 100);
+                setTimeout(() => inkSystem.vortex(centerX, centerY, 1), 50);
+            }
+
             // 填充面板内容
             document.getElementById('cert-panel-title').textContent = data.title;
             document.getElementById('cert-panel-body').innerHTML = data.items.map((item, index) => `
@@ -2065,10 +2082,12 @@
                 </div>
             `).join('');
 
-            // 打开面板
-            document.getElementById('cert-panel-backdrop').classList.add('active');
-            document.getElementById('cert-panel').classList.add('active');
-            document.body.style.overflow = 'hidden';
+            // 延迟打开面板，让墨水特效先展示
+            setTimeout(() => {
+                document.getElementById('cert-panel-backdrop').classList.add('active');
+                document.getElementById('cert-panel').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 400);
         }
 
         function closeCertPanel() {
@@ -2081,8 +2100,8 @@
         const config = {
             projects: [
                 {
-                    title: '毕业设计 · 具身智能机械臂',
-                    shortTitle: '毕设 · 具身智能',
+                    title: '毕业设计',
+                    shortTitle: '基于VLA实现的机械臂',
                     description: '基于 VLA 模型的实现路径研究。对当前主流 VLA 模型进行实验验证，并进行架构调整与加入更多模态进行泛化能力加强探索。',
                     tags: ['Python', 'PyTorch', 'VLA', '具身智能', '机械臂控制'],
                     icon: '🦾',
@@ -2146,7 +2165,7 @@
                 }
             ],
             skills: [
-                { category: '编程语言', items: ['Python', 'C/C++', 'MATLAB'] },
+                { category: '编程语言', items: ['Python', 'C', 'MATLAB'] },
                 { category: '机器人 & AI', items: ['ROS2', 'PyTorch', 'OpenCV', 'VLA 模型'] },
                 { category: '硬件 & 工具', items: ['STM32', 'SolidWorks', 'Git', 'Linux'] }
             ]
@@ -2171,7 +2190,7 @@
                     <div class="project-orb-icon">${project.icon}</div>
                     <div class="project-orb-title">${project.shortTitle || project.title}</div>
                 `;
-                orb.addEventListener('click', () => openPanel(index));
+                orb.addEventListener('click', (e) => openPanel(index, e.clientX, e.clientY));
                 container.appendChild(orb);
             });
         }
@@ -2291,11 +2310,12 @@
         }
 
         // Open Side Panel
-        function openPanel(index) {
+        function openPanel(index, clickX, clickY) {
             currentProjectIndex = index;
             currentSlideIndex = 0;
             const project = config.projects[index];
             
+            // 先准备面板内容
             document.getElementById('panel-icon').textContent = project.icon;
             document.getElementById('panel-title').textContent = project.shortTitle || project.title;
             document.getElementById('panel-info-title').textContent = project.title;
@@ -2314,9 +2334,17 @@
             
             renderCarousel(project);
             
-            document.getElementById('panel-backdrop').classList.add('active');
-            document.getElementById('project-panel').classList.add('active');
-            document.body.style.overflow = 'hidden';
+            // 触发墨水爆发特效（在点击位置）
+            if (inkSystem && clickX && clickY) {
+                inkSystem.burst(clickX, clickY, 30, 150);
+            }
+            
+            // 延迟打开面板，让墨水特效先展示
+            setTimeout(() => {
+                document.getElementById('panel-backdrop').classList.add('active');
+                document.getElementById('project-panel').classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 400);
         }
 
         // Close Panel
@@ -2500,34 +2528,28 @@
         function initInkInteractions() {
             if (!inkSystem) return;
 
-            // 1. 项目球体滚动时濫起墨水尾迹
-            const orbsContainer = document.getElementById('projects-orbs');
-            if (orbsContainer) {
-                orbsContainer.addEventListener('mouseenter', (e) => {
-                    if (e.target.classList.contains('project-orb')) {
-                        const rect = e.target.getBoundingClientRect();
-                        const x = rect.left + rect.width / 2;
-                        const y = rect.top + rect.height / 2;
-                        inkSystem.vortex(x, y, 0.5);
-                    }
-                });
-            }
-
-            // 2. 卡片悬停吸引墨水
-            document.querySelectorAll('.highlight-card, .skill-category').forEach(card => {
-                card.addEventListener('mouseenter', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    inkSystem.vortex(rect.left + rect.width/2, rect.top + rect.height/2, 0.3);
+            // 1. 项目球体悬停时墨水被吸收旋转
+            document.querySelectorAll('.project-orb').forEach(orb => {
+                orb.addEventListener('mouseenter', (e) => {
+                    const rect = orb.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    inkSystem.vortex(x, y, 1.5);
+                    setTimeout(() => inkSystem.burst(x, y, 10, 50), 100);
                 });
             });
 
-            // 3. 点击爆发墨水
+            // 2. 卡片悬停时墨水旋转进入
+            document.querySelectorAll('.highlight-card, .skill-category').forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    inkSystem.vortex(rect.left + rect.width/2, rect.top + rect.height/2, 0.8);
+                });
+            });
+
+            // 3. 任意点击爆发墨水
             document.addEventListener('click', (e) => {
-                // 排除按钮和输入框
-                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || 
-                    e.target.tagName === 'INPUT' || e.target.closest('.highlight-card')) {
-                    inkSystem.burst(e.clientX, e.clientY, 12, 80);
-                }
+                inkSystem.burst(e.clientX, e.clientY, 25, 120);
             });
 
             // 4. 打字时墨水跳动
@@ -2539,7 +2561,7 @@
                     const now = Date.now();
                     if (now - lastCharTime > 50) {
                         const rect = typewriterContainer.getBoundingClientRect();
-                        inkSystem.rain(rect.right - 20, 60, 2);
+                        inkSystem.rain(rect.right - 20, 80, 6);
                         lastCharTime = now;
                     }
                 });
@@ -2547,19 +2569,7 @@
             }
 
             // 5. 面杺打开时墨水被推开
-            const panelBackdrop = document.getElementById('panel-backdrop');
-            const certPanelBackdrop = document.getElementById('cert-panel-backdrop');
-            
-            [panelBackdrop, certPanelBackdrop].forEach(backdrop => {
-                if (backdrop) {
-                    backdrop.addEventListener('transitionend', (e) => {
-                        if (e.propertyName === 'opacity' && backdrop.classList.contains('active')) {
-                            const rect = backdrop.getBoundingClientRect();
-                            inkSystem.burst(rect.width / 2, window.innerHeight / 2, 16, 200);
-                        }
-                    });
-                }
-            });
+
 
             // 6. 滚动加速墨水生成
             let lastScrollY = window.scrollY;
@@ -2574,27 +2584,12 @@
                 }, 100);
 
                 // 快速滚动时产生墨水流
-                if (scrollDelta > 50 && Math.random() > 0.7) {
+                if (scrollDelta > 30 && Math.random() > 0.5) {
                     const x = Math.random() * window.innerWidth;
                     const y = currentScrollY > lastScrollY ? -10 : window.innerHeight + 10;
                     inkSystem.rain(x, 0, 3);
                 }
             }, { passive: true });
-
-            // 7. 证书面板弹出时墨水入场
-            document.querySelectorAll('.highlight-card').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    const rect = card.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    
-                    // 先爆发后旋涡
-                    inkSystem.burst(centerX, centerY, 8, 50);
-                    setTimeout(() => {
-                        inkSystem.vortex(centerX, centerY, 1);
-                    }, 100);
-                });
-            });
 
             // 8. 导航链接悬停
             document.querySelectorAll('.nav-links a').forEach(link => {
