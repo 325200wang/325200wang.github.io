@@ -29,7 +29,7 @@
             --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
             --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.2);
             --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-rolling: cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         html {
@@ -47,15 +47,16 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Mouse Trail Canvas */
-        #mouse-trail {
+        /* 水墨粒子 Canvas */
+        #ink-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 1; /* 降低层级，在内容后面 */
+            opacity: 0.4; /* 降低透明度 */
         }
 
         /* Navigation */
@@ -84,10 +85,28 @@
         }
 
         .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             font-size: 21px;
             font-weight: 600;
             color: var(--text-primary);
             letter-spacing: -0.021em;
+        }
+
+        .nav-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--bg-secondary);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
         }
 
         .nav-links {
@@ -201,8 +220,27 @@
             color: var(--text-secondary);
             margin-bottom: 24px;
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUp 0.8s var(--ease-out-expo) 0.6s forwards;
+            animation: fadeIn 0.3s ease 1s forwards;
+            min-height: 40px;
+        }
+
+        .typewriter-text {
+            display: inline;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 28px;
+            background: var(--accent);
+            margin-left: 4px;
+            vertical-align: middle;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
 
         .hero-description {
@@ -213,7 +251,7 @@
             line-height: 1.5;
             opacity: 0;
             transform: translateY(20px);
-            animation: fadeUp 0.8s var(--ease-out-expo) 0.8s forwards;
+            animation: fadeUp 0.8s var(--ease-out-expo) 2.2s forwards;
         }
 
         .hero-cta {
@@ -230,7 +268,7 @@
             transition: all 0.3s var(--ease-spring);
             opacity: 0;
             transform: translateY(20px);
-            animation: fadeUp 0.8s var(--ease-out-expo) 1s forwards;
+            animation: fadeUp 0.8s var(--ease-out-expo) 2.4s forwards;
         }
 
         .hero-cta:hover {
@@ -255,7 +293,7 @@
             padding-top: 40px;
             border-top: 1px solid rgba(0, 0, 0, 0.08);
             opacity: 0;
-            animation: fadeIn 1s ease 1.2s forwards;
+            animation: fadeIn 1s ease 2.6s forwards;
         }
 
         .hero-stat {
@@ -283,6 +321,11 @@
             to { opacity: 1; }
         }
 
+        @keyframes slideInFromLeft {
+            0% { opacity: 0; transform: translateX(-40px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
         /* Section Styles */
         .section {
             padding: 120px 0;
@@ -302,6 +345,9 @@
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--ease-out-expo);
         }
 
         .section-title {
@@ -310,18 +356,33 @@
             line-height: 1.1;
             letter-spacing: -0.03em;
             margin-bottom: 16px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--ease-out-expo) 0.1s;
         }
 
         .section-description {
             font-size: 21px;
             color: var(--text-secondary);
             line-height: 1.5;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s var(--ease-out-expo) 0.2s;
+        }
+
+        .section-header.visible .section-eyebrow,
+        .section-header.visible .section-title,
+        .section-header.visible .section-description {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Projects Section */
         .projects {
             background: var(--bg-primary);
             min-height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
 
         .projects-container {
@@ -337,6 +398,7 @@
             gap: 40px;
             flex-wrap: wrap;
             padding: 40px 0;
+            min-height: 260px;
         }
 
         .project-orb {
@@ -353,11 +415,83 @@
             position: relative;
             overflow: hidden;
             box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateX(60vw) rotate(360deg);
         }
+
+        .project-orb.roll-in {
+            animation: rollIn 0.8s var(--ease-rolling) forwards;
+        }
+
+        .project-orb.roll-out-right {
+            animation: rollOutRight 0.7s var(--ease-rolling) forwards;
+        }
+
+        .project-orb.roll-in-left {
+            animation: rollInLeft 0.8s var(--ease-rolling) forwards;
+        }
+
+        .project-orb.roll-out-left {
+            animation: rollOutLeft 0.7s var(--ease-rolling) forwards;
+        }
+
+        @keyframes rollIn {
+            0% { opacity: 0; transform: translateX(60vw) rotate(360deg); }
+            30% { opacity: 1; }
+            100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+        }
+
+        @keyframes rollOutRight {
+            0% { opacity: 1; transform: translateX(0) rotate(0deg); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(60vw) rotate(360deg); }
+        }
+
+        @keyframes rollInLeft {
+            0% { opacity: 0; transform: translateX(-60vw) rotate(-360deg); }
+            30% { opacity: 1; }
+            100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+        }
+
+        @keyframes rollOutLeft {
+            0% { opacity: 1; transform: translateX(0) rotate(0deg); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-60vw) rotate(-360deg); }
+        }
+
+        .project-orb.roll-in:nth-child(1) { animation-delay: 0s; }
+        .project-orb.roll-in:nth-child(2) { animation-delay: 0.12s; }
+        .project-orb.roll-in:nth-child(3) { animation-delay: 0.24s; }
+        .project-orb.roll-in:nth-child(4) { animation-delay: 0.36s; }
+        .project-orb.roll-in:nth-child(5) { animation-delay: 0.48s; }
+
+        .project-orb.roll-in-left:nth-child(1) { animation-delay: 0s; }
+        .project-orb.roll-in-left:nth-child(2) { animation-delay: 0.12s; }
+        .project-orb.roll-in-left:nth-child(3) { animation-delay: 0.24s; }
+        .project-orb.roll-in-left:nth-child(4) { animation-delay: 0.36s; }
+        .project-orb.roll-in-left:nth-child(5) { animation-delay: 0.48s; }
+
+        .project-orb.roll-out-right:nth-child(1) { animation-delay: 0.48s; }
+        .project-orb.roll-out-right:nth-child(2) { animation-delay: 0.36s; }
+        .project-orb.roll-out-right:nth-child(3) { animation-delay: 0.24s; }
+        .project-orb.roll-out-right:nth-child(4) { animation-delay: 0.12s; }
+        .project-orb.roll-out-right:nth-child(5) { animation-delay: 0s; }
+
+        .project-orb.roll-out-left:nth-child(1) { animation-delay: 0.48s; }
+        .project-orb.roll-out-left:nth-child(2) { animation-delay: 0.36s; }
+        .project-orb.roll-out-left:nth-child(3) { animation-delay: 0.24s; }
+        .project-orb.roll-out-left:nth-child(4) { animation-delay: 0.12s; }
+        .project-orb.roll-out-left:nth-child(5) { animation-delay: 0s; }
 
         .project-orb:hover {
             transform: scale(1.08);
             box-shadow: var(--shadow-lg);
+        }
+
+        .project-orb.visible {
+            opacity: 1;
+            transform: translateX(0) rotate(0deg);
+            animation: none;
         }
 
         .project-orb.active {
@@ -386,21 +520,143 @@
         }
 
         .project-orb-award {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #ffd700 0%, #ffb800 100%);
+            display: none; /* 隐藏球体上的奖杯图标 */
+        }
+
+        /* Certificate Panel - Left Side */
+        .cert-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 600px;
+            z-index: 2000;
+            transform: translateX(-100%);
+            transition: transform 0.5s var(--ease-out-expo);
+        }
+
+        .cert-panel.active {
+            transform: translateX(0);
+        }
+
+        .cert-panel-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            backdrop-filter: blur(0);
+            transition: all 0.4s ease;
+            pointer-events: none;
+            z-index: 1999;
+        }
+
+        .cert-panel-backdrop.active {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+        }
+
+        .cert-panel-content {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-xl);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .cert-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: var(--bg-primary);
+            flex-shrink: 0;
+        }
+
+        .cert-panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cert-panel-close {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            box-shadow: 0 2px 8px rgba(255, 184, 0, 0.4);
+            font-size: 24px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
         }
 
-        /* Side Panel - 右侧滑入面板 */
+        .cert-panel-close:hover {
+            background: var(--text-primary);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .cert-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .cert-item {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s var(--ease-spring);
+            cursor: pointer;
+        }
+
+        .cert-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .cert-item-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .cert-item-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .cert-item-date {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+
+        .cert-preview {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 14px;
+            border: 2px dashed var(--bg-secondary);
+        }
+
+        /* Side Panel */
         .project-panel {
             position: fixed;
             top: 0;
@@ -496,7 +752,6 @@
             overflow-x: hidden;
         }
 
-        /* 轮播区域 */
         .project-panel-carousel {
             width: 100%;
             position: relative;
@@ -536,7 +791,6 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
 
-        /* 轮播控制 */
         .project-panel-carousel-nav {
             position: absolute;
             top: 50%;
@@ -601,7 +855,6 @@
             transform: scale(1.3);
         }
 
-        /* 项目详情 */
         .project-panel-info {
             padding: 32px 24px;
         }
@@ -687,6 +940,18 @@
 
         .about-text p {
             margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s var(--ease-out-expo);
+        }
+
+        .about-text p:nth-child(1) { transition-delay: 0s; }
+        .about-text p:nth-child(2) { transition-delay: 0.15s; }
+        .about-text p:nth-child(3) { transition-delay: 0.3s; }
+
+        .about-text.visible p {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .about-highlights {
@@ -700,11 +965,85 @@
             padding: 24px;
             border-radius: 16px;
             box-shadow: var(--shadow-sm);
+            opacity: 0;
+            transform: translateX(40px);
+            transition: all 0.7s var(--ease-out-expo);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .highlight-card-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .highlight-card-text {
+            flex: 1;
+        }
+
+        .highlight-card-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-secondary);
             transition: all 0.3s var(--ease-spring);
+            flex-shrink: 0;
+        }
+
+        .highlight-card:hover .highlight-card-arrow {
+            background: var(--accent);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        /* 点击时的磁吸弹性效果 */
+        .highlight-card.magnetic-active {
+            animation: magneticClick 0.5s var(--ease-out-expo);
+        }
+
+        @keyframes magneticClick {
+            0% { transform: scale(1); }
+            30% { transform: scale(0.92) translateX(10px); }
+            60% { transform: scale(1.02) translateX(-5px); }
+            100% { transform: scale(1) translateX(0); }
+        }
+
+        /* 波纹效果 */
+        .highlight-card-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,113,227,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            pointer-events: none;
+            animation: rippleEffect 0.8s ease-out forwards;
+        }
+
+        @keyframes rippleEffect {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+
+        .highlight-card:nth-child(1) { transition-delay: 0.1s; }
+        .highlight-card:nth-child(2) { transition-delay: 0.25s; }
+        .highlight-card:nth-child(3) { transition-delay: 0.4s; }
+        .highlight-card:nth-child(4) { transition-delay: 0.55s; }
+
+        .about-highlights.visible .highlight-card {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         .highlight-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.02);
             box-shadow: var(--shadow-md);
         }
 
@@ -888,7 +1227,35 @@
             .section-title { font-size: 32px; }
             .section-description { font-size: 17px; }
 
-            .projects-orbs { gap: 24px; }
+            .project-orb {
+                transform: translateX(30vw) rotate(180deg);
+            }
+            
+            @keyframes rollIn {
+                0% { opacity: 0; transform: translateX(30vw) rotate(180deg); }
+                30% { opacity: 1; }
+                100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+            }
+
+            @keyframes rollOutRight {
+                0% { opacity: 1; transform: translateX(0) rotate(0deg); }
+                70% { opacity: 1; }
+                100% { opacity: 0; transform: translateX(30vw) rotate(180deg); }
+            }
+
+            @keyframes rollInLeft {
+                0% { opacity: 0; transform: translateX(-30vw) rotate(-180deg); }
+                30% { opacity: 1; }
+                100% { opacity: 1; transform: translateX(0) rotate(0deg); }
+            }
+
+            @keyframes rollOutLeft {
+                0% { opacity: 1; transform: translateX(0) rotate(0deg); }
+                70% { opacity: 1; }
+                100% { opacity: 0; transform: translateX(-30vw) rotate(-180deg); }
+            }
+
+            .projects-orbs { gap: 20px; }
             .project-orb { width: 130px; height: 130px; }
             .project-orb-icon { font-size: 36px; }
             .project-orb-title { font-size: 11px; }
@@ -902,18 +1269,21 @@
             .about-content { padding: 0 24px; }
             .projects-container { padding: 0 20px; }
 
-            #mouse-trail { display: none; }
+            #ink-canvas { display: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Mouse Trail Canvas -->
-    <canvas id="mouse-trail"></canvas>
+    <!-- 水墨 Canvas -->
+    <canvas id="ink-canvas"></canvas>
 
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-content">
-            <div class="nav-logo">王昱程</div>
+            <div class="nav-logo">
+                <img src="avatar.jpg" alt="头像" class="nav-avatar" onerror="this.style.display='none'">
+                王昱程
+            </div>
             <button class="mobile-menu-btn">☰</button>
             <ul class="nav-links">
                 <li><a href="#projects">项目</a></li>
@@ -929,15 +1299,16 @@
         <div class="hero-content">
             <div class="hero-badge">正在寻找实习机会</div>
             <h1 class="hero-title">王昱程</h1>
-            <p class="hero-subtitle">智能制造工程 · Focus in 具身智能</p>
+            
+            <p class="hero-subtitle" id="typewriter-container">
+                <span class="typewriter-text" id="typewriter-text"></span>
+                <span class="typewriter-cursor" id="typewriter-cursor"></span>
+            </p>
+            
             <p class="hero-description">
                 西安交通大学本科毕业生，专注于机器人控制、智能系统与 VLA 模型应用。
-                
                 从竞赛到科研，用代码赋予机器感知世界的能力。
             </p>
-           
-                
-
             <a href="#projects" class="hero-cta">浏览项目作品</a>
             
             <div class="hero-stats">
@@ -946,12 +1317,12 @@
                     <div class="hero-stat-label">竞赛获奖</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">5+</div>
+                    <div class="hero-stat-number">5</div>
                     <div class="hero-stat-label">完整项目</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">87.44</div>
-                    <div class="hero-stat-label">综合成绩</div>
+                    <div class="hero-stat-number">84.44</div>
+                    <div class="hero-stat-label">均分成绩</div>
                 </div>
             </div>
         </div>
@@ -959,7 +1330,7 @@
 
     <!-- Projects Section -->
     <section class="section projects" id="projects">
-        <div class="section-header">
+        <div class="section-header" id="projects-header">
             <p class="section-eyebrow">Selected Works</p>
             <h2 class="section-title">项目作品</h2>
             <p class="section-description">点击下方的项目球体，探索我的作品详情</p>
@@ -969,10 +1340,8 @@
             <div class="projects-orbs" id="projects-orbs"></div>
         </div>
 
-        <!-- Side Panel Backdrop -->
         <div class="project-panel-backdrop" id="panel-backdrop" onclick="closePanel()"></div>
         
-        <!-- Side Panel - 右侧滑出面板 -->
         <div class="project-panel" id="project-panel">
             <div class="project-panel-content">
                 <div class="project-panel-header">
@@ -984,30 +1353,22 @@
                 </div>
                 
                 <div class="project-panel-body">
-                    <!-- Carousel -->
                     <div class="project-panel-carousel" id="panel-carousel">
-                        <div class="project-panel-carousel-inner" id="panel-carousel-inner">
-                            <!-- Slides will be rendered here -->
-                        </div>
+                        <div class="project-panel-carousel-inner" id="panel-carousel-inner"></div>
                         <div class="project-panel-carousel-nav">
                             <button class="project-panel-carousel-arrow" onclick="prevSlide()">‹</button>
                             <button class="project-panel-carousel-arrow" onclick="nextSlide()">›</button>
                         </div>
-                        <div class="project-panel-carousel-dots" id="panel-carousel-dots">
-                            <!-- Dots will be rendered here -->
-                        </div>
+                        <div class="project-panel-carousel-dots" id="panel-carousel-dots"></div>
                     </div>
                     
-                    <!-- Info -->
                     <div class="project-panel-info">
                         <div class="project-panel-info-header">
                             <h3 class="project-panel-info-title" id="panel-info-title">项目标题</h3>
                             <span class="project-panel-award" id="panel-award">🏆 国家级一等奖</span>
                         </div>
                         <p class="project-panel-description" id="panel-description">项目描述...</p>
-                        <div class="project-panel-tags" id="panel-tags">
-                            <!-- Tags will be rendered here -->
-                        </div>
+                        <div class="project-panel-tags" id="panel-tags"></div>
                     </div>
                 </div>
             </div>
@@ -1016,14 +1377,14 @@
 
     <!-- About Section -->
     <section class="section about" id="about">
-        <div class="section-header">
+        <div class="section-header" id="about-header">
             <p class="section-eyebrow">About Me</p>
             <h2 class="section-title">关于我</h2>
         </div>
         
         <div class="about-content">
             <div class="about-grid">
-                <div class="about-text">
+                <div class="about-text" id="about-text">
                     <p>
                         我是西安交通大学智能制造工程专业的本科毕业生。在校期间，我深入学习了机器人控制、智能系统、机器人感知等核心课程，学业均分 84.44，雅思 7 分。
                     </p>
@@ -1034,31 +1395,65 @@
                         目前正在寻找实习机会，希望能够将我的技能和经验应用到实际的具身智能项目中。
                     </p>
                 </div>
-                <div class="about-highlights">
-                    <div class="highlight-card">
-                        <div class="highlight-label">教育背景</div>
-                        <div class="highlight-value">西安交通大学 · 智能制造工程</div>
+                <div class="about-highlights" id="about-highlights">
+                    <div class="highlight-card" data-cert="education" onclick="openCertPanel('education', event)">
+                        <div class="highlight-card-content">
+                            <div class="highlight-card-text">
+                                <div class="highlight-label">教育背景</div>
+                                <div class="highlight-value">西安交通大学 · 智能制造工程</div>
+                            </div>
+                            <div class="highlight-card-arrow">→</div>
+                        </div>
                     </div>
-                    <div class="highlight-card">
-                        <div class="highlight-label">语言能力</div>
-                        <div class="highlight-value">雅思 7.0 · CET-6</div>
+                    <div class="highlight-card" data-cert="language" onclick="openCertPanel('language', event)">
+                        <div class="highlight-card-content">
+                            <div class="highlight-card-text">
+                                <div class="highlight-label">语言能力</div>
+                                <div class="highlight-value">雅思 7.0 · CET-6</div>
+                            </div>
+                            <div class="highlight-card-arrow">→</div>
+                        </div>
                     </div>
-                    <div class="highlight-card">
-                        <div class="highlight-label">荣誉奖项</div>
-                        <div class="highlight-value">工程实践大赛国一 · RoboCup 国三</div>
+                    <div class="highlight-card" data-cert="awards" onclick="openCertPanel('awards', event)">
+                        <div class="highlight-card-content">
+                            <div class="highlight-card-text">
+                                <div class="highlight-label">荣誉奖项</div>
+                                <div class="highlight-value">工程实践大赛国一 · RoboCup 国三</div>
+                            </div>
+                            <div class="highlight-card-arrow">→</div>
+                        </div>
                     </div>
-                    <div class="highlight-card">
-                        <div class="highlight-label">学生工作</div>
-                        <div class="highlight-value">3+ 学生组织任职经历</div>
+                    <div class="highlight-card" data-cert="work" onclick="openCertPanel('work', event)">
+                        <div class="highlight-card-content">
+                            <div class="highlight-card-text">
+                                <div class="highlight-label">学生工作</div>
+                                <div class="highlight-value">3+ 学生组织任职经历</div>
+                            </div>
+                            <div class="highlight-card-arrow">→</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Certificate Panel -->
+    <div class="cert-panel-backdrop" id="cert-panel-backdrop" onclick="closeCertPanel()"></div>
+    <div class="cert-panel" id="cert-panel">
+        <div class="cert-panel-content">
+            <div class="cert-panel-header">
+                <span class="cert-panel-title" id="cert-panel-title">证书详情</span>
+                <button class="cert-panel-close" onclick="closeCertPanel()">×</button>
+            </div>
+            <div class="cert-panel-body" id="cert-panel-body">
+                <!-- 证书列表将通过 JS 动态生成 -->
+            </div>
+        </div>
+    </div>
+
     <!-- Skills Section -->
     <section class="section skills" id="skills">
-        <div class="section-header">
+        <div class="section-header" id="skills-header">
             <p class="section-eyebrow">Capabilities</p>
             <h2 class="section-title">技能专长</h2>
         </div>
@@ -1099,19 +1494,21 @@
     </footer>
 
     <script>
-        // Optimized Mouse Trail
-        class MouseTrail {
+        // 水墨粒子效果
+        class InkParticleSystem {
             constructor() {
-                this.canvas = document.getElementById('mouse-trail');
+                this.canvas = document.getElementById('ink-canvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.maxParticles = 20;
+                this.droplets = []; // 墨滴
+                this.trails = []; // 笔迹
                 this.mouseX = 0;
                 this.mouseY = 0;
                 this.lastMouseX = 0;
                 this.lastMouseY = 0;
+                this.isMoving = false;
+                this.moveTimeout = null;
                 this.frameCount = 0;
-                this.isActive = true;
+                
                 this.init();
             }
 
@@ -1119,9 +1516,6 @@
                 this.resize();
                 window.addEventListener('resize', () => this.resize());
                 document.addEventListener('mousemove', (e) => this.onMouseMove(e));
-                document.addEventListener('visibilitychange', () => {
-                    this.isActive = document.visibilityState === 'visible';
-                });
                 this.animate();
             }
 
@@ -1133,92 +1527,557 @@
             onMouseMove(e) {
                 this.mouseX = e.clientX;
                 this.mouseY = e.clientY;
+                this.isMoving = true;
+
                 const dist = Math.hypot(this.mouseX - this.lastMouseX, this.mouseY - this.lastMouseY);
                 
-                if (dist > 20 && this.particles.length < this.maxParticles) {
-                    this.particles.push({
-                        x: this.mouseX,
-                        y: this.mouseY,
-                        size: Math.random() * 5 + 3,
-                        alpha: 0.5,
-                        decay: 0.03,
-                        vx: (Math.random() - 0.5) * 0.6,
-                        vy: (Math.random() - 0.5) * 0.6
-                    });
+                // 当移动距离足够时，添加新的墨迹
+                if (dist > 5) {
+                    // 主墨滴
+                    this.droplets.push(new InkDroplet(this.mouseX, this.mouseY, dist));
+                    
+                    // 偶尔添加飞溅的小墨点
+                    if (Math.random() > 0.7) {
+                        for (let i = 0; i < 2; i++) {
+                            this.droplets.push(new InkSplash(
+                                this.mouseX + (Math.random() - 0.5) * 30,
+                                this.mouseY + (Math.random() - 0.5) * 30
+                            ));
+                        }
+                    }
+
+                    // 添加笔迹连接
+                    if (this.trails.length > 0) {
+                        const lastTrail = this.trails[this.trails.length - 1];
+                        const trailDist = Math.hypot(this.mouseX - lastTrail.x, this.mouseY - lastTrail.y);
+                        if (trailDist > 20) {
+                            this.trails.push(new InkTrail(this.lastMouseX, this.lastMouseY, this.mouseX, this.mouseY));
+                        }
+                    } else {
+                        this.trails.push(new InkTrail(this.lastMouseX, this.lastMouseY, this.mouseX, this.mouseY));
+                    }
+
                     this.lastMouseX = this.mouseX;
                     this.lastMouseY = this.mouseY;
                 }
+
+                clearTimeout(this.moveTimeout);
+                this.moveTimeout = setTimeout(() => {
+                    this.isMoving = false;
+                }, 100);
             }
 
             animate() {
-                if (!this.isActive) {
-                    requestAnimationFrame(() => this.animate());
-                    return;
-                }
-
                 this.frameCount++;
-                if (this.frameCount % 2 === 0) {
-                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                }
+                
+                // 更频繁地清除，避免墨迹堆积影响阅读
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    const p = this.particles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.alpha -= p.decay;
-                    p.size *= 0.98;
-
-                    if (p.alpha <= 0 || p.size <= 0.5) {
-                        this.particles.splice(i, 1);
-                        continue;
+                // 更新和绘制笔迹
+                for (let i = this.trails.length - 1; i >= 0; i--) {
+                    const trail = this.trails[i];
+                    trail.update();
+                    trail.draw(this.ctx);
+                    if (trail.isDead()) {
+                        this.trails.splice(i, 1);
                     }
-
-                    const gradient = this.ctx.createRadialGradient(
-                        p.x, p.y, 0,
-                        p.x, p.y, p.size * 2
-                    );
-                    gradient.addColorStop(0, `rgba(0, 113, 227, ${p.alpha})`);
-                    gradient.addColorStop(0.5, `rgba(0, 113, 227, ${p.alpha * 0.3})`);
-                    gradient.addColorStop(1, 'transparent');
-
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
-                    this.ctx.fillStyle = gradient;
-                    this.ctx.fill();
                 }
 
-                if (this.frameCount % 3 === 0 && this.particles.length > 1) {
-                    this.drawConnections();
+                // 更新和绘制墨滴
+                for (let i = this.droplets.length - 1; i >= 0; i--) {
+                    const drop = this.droplets[i];
+                    drop.update();
+                    drop.draw(this.ctx);
+                    if (drop.isDead()) {
+                        this.droplets.splice(i, 1);
+                    }
                 }
 
                 requestAnimationFrame(() => this.animate());
             }
 
-            drawConnections() {
-                this.ctx.lineWidth = 1;
-                const maxDist = 80;
-                for (let i = 0; i < this.particles.length; i++) {
-                    let connections = 0;
-                    for (let j = i + 1; j < this.particles.length && connections < 3; j++) {
-                        const dx = this.particles[i].x - this.particles[j].x;
-                        const dy = this.particles[i].y - this.particles[j].y;
-                        const dist = Math.hypot(dx, dy);
-                        
-                        if (dist < maxDist) {
-                            const alpha = (1 - dist / maxDist) * 0.25;
-                            this.ctx.beginPath();
-                            this.ctx.moveTo(this.particles[i].x, this.particles[i].y);
-                            this.ctx.lineTo(this.particles[j].x, this.particles[j].y);
-                            this.ctx.strokeStyle = `rgba(0, 113, 227, ${alpha})`;
-                            this.ctx.stroke();
-                            connections++;
-                        }
-                    }
+            // 全局联动方法
+            
+            // 墨水爆发效果
+            burst(x, y, count = 8, spread = 60) {
+                for (let i = 0; i < count; i++) {
+                    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+                    const dist = Math.random() * spread;
+                    const px = x + Math.cos(angle) * dist;
+                    const py = y + Math.sin(angle) * dist;
+                    this.droplets.push(new InkExplosion(px, py, angle));
+                }
+            }
+
+            // 墨水旋涡效果
+            vortex(x, y, force = 1) {
+                for (let i = 0; i < 5; i++) {
+                    this.droplets.push(new InkVortex(x, y, force));
+                }
+            }
+
+            // 墨水连线（用于打字效果）
+            connect(x1, y1, x2, y2) {
+                this.trails.push(new InkTrail(x1, y1, x2, y2, 2));
+            }
+
+            // 墨水雨效果
+            rain(x, width = 100, intensity = 5) {
+                for (let i = 0; i < intensity; i++) {
+                    const rx = x + (Math.random() - 0.5) * width;
+                    const ry = -10 - Math.random() * 50;
+                    this.droplets.push(new InkRaindrop(rx, ry));
                 }
             }
         }
 
-        // Configuration - 支持每张图片自定义说明文字
+        // 墨滴类 - 模拟墨水滴入水中扩散
+        class InkDroplet {
+            constructor(x, y, speed) {
+                this.x = x;
+                this.y = y;
+                this.age = 0;
+                this.maxAge = 45 + Math.random() * 30; // 1-1.5秒消失 (60fps)
+                
+                // 半径随速度变化 (大小 +50%)
+                this.baseRadius = 9 + Math.random() * 12;
+                this.currentRadius = 2;
+                this.targetRadius = this.baseRadius * (1 + speed * 0.015);
+                
+                // 扩散速度
+                this.spreadSpeed = 0.8 + Math.random() * 0.3;
+                
+                // 墨水浓度（透明度）(浓度 +30%)
+                this.density = 1 + Math.random() * 0.13;
+                
+                // 不规则形状参数
+                this.points = [];
+                const pointCount = 6 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < pointCount; i++) {
+                    this.points.push({
+                        angle: (i / pointCount) * Math.PI * 2,
+                        offset: 0.8 + Math.random() * 0.4,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            update() {
+                this.age++;
+                
+                // 半径逐渐扩散
+                if (this.currentRadius < this.targetRadius) {
+                    this.currentRadius += this.spreadSpeed;
+                }
+                
+                // 快速变淡
+                this.density *= 0.92;
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01) return;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // 绘制不规则墨滴形状
+                ctx.beginPath();
+                this.points.forEach((point, i) => {
+                    const r = this.currentRadius * point.offset * 
+                              (0.9 + 0.1 * Math.sin(this.age * 0.05 + point.phase));
+                    const px = Math.cos(point.angle) * r;
+                    const py = Math.sin(point.angle) * r;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(px, py);
+                    } else {
+                        // 使用二次贝塞尔曲线使边缘更柔和
+                        const prevPoint = this.points[i - 1];
+                        const prevR = this.currentRadius * prevPoint.offset * 
+                                     (0.9 + 0.1 * Math.sin(this.age * 0.05 + prevPoint.phase));
+                        const prevX = Math.cos(prevPoint.angle) * prevR;
+                        const prevY = Math.sin(prevPoint.angle) * prevR;
+                        const cpX = (prevX + px) / 2;
+                        const cpY = (prevY + py) / 2;
+                        ctx.quadraticCurveTo(prevX, prevY, px, py);
+                    }
+                });
+                ctx.closePath();
+
+                // 径向渐变模拟墨水晕染
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.currentRadius);
+                gradient.addColorStop(0, `rgba(30, 30, 30, ${this.density})`);
+                gradient.addColorStop(0.4, `rgba(50, 50, 50, ${this.density * 0.6})`);
+                gradient.addColorStop(0.7, `rgba(80, 80, 80, ${this.density * 0.3})`);
+                gradient.addColorStop(1, `rgba(100, 100, 100, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                ctx.restore();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005;
+            }
+        }
+
+        // 墨点飞溅类 - 小的飞溅墨点
+        class InkSplash {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = 2.25 + Math.random() * 3.75; // 大小 +50%
+                this.age = 0;
+                this.maxAge = 30 + Math.random() * 20; // 0.5-0.8秒消失
+                this.density = 0.2 + Math.random() * 0.104; // 浓度 +30%
+            }
+
+            update() {
+                this.age++;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+                this.density *= 0.90; // 快速变淡
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01) return;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(40, 40, 40, ${this.density})`;
+                ctx.fill();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005;
+            }
+        }
+
+        // 笔迹类 - 连接移动轨迹的墨线
+        class InkTrail {
+            constructor(x1, y1, x2, y2) {
+                this.x1 = x1;
+                this.y1 = y1;
+                this.x2 = x2;
+                this.y2 = y2;
+                this.age = 0;
+                this.maxAge = 40 + Math.random() * 25; // 约1秒消失
+                this.width = 8 + Math.random() * 6; // 大小 +50%
+                this.density = 0.09 + Math.random() * 0.1; // 浓度 +30%
+                
+                // 笔迹的不规则波动
+                this.segments = [];
+                const dist = Math.hypot(x2 - x1, y2 - y1);
+                const segmentCount = Math.max(3, Math.floor(dist / 10));
+                for (let i = 0; i <= segmentCount; i++) {
+                    const t = i / segmentCount;
+                    this.segments.push({
+                        x: x1 + (x2 - x1) * t + (Math.random() - 0.5) * 4,
+                        y: y1 + (y2 - y1) * t + (Math.random() - 0.5) * 4,
+                        widthOffset: 0.7 + Math.random() * 0.6
+                    });
+                }
+            }
+
+            update() {
+                this.age++;
+                this.density *= 0.88; // 快速变淡
+                this.width *= 0.97;
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01 || this.segments.length < 2) return;
+
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                // 绘制主笔迹
+                ctx.beginPath();
+                ctx.moveTo(this.segments[0].x, this.segments[0].y);
+                
+                for (let i = 1; i < this.segments.length; i++) {
+                    const curr = this.segments[i];
+                    const prev = this.segments[i - 1];
+                    const cpX = (prev.x + curr.x) / 2;
+                    const cpY = (prev.y + curr.y) / 2;
+                    ctx.quadraticCurveTo(prev.x, prev.y, cpX, cpY);
+                }
+                
+                ctx.lineTo(this.segments[this.segments.length - 1].x, 
+                          this.segments[this.segments.length - 1].y);
+                
+                ctx.lineWidth = this.width;
+                ctx.strokeStyle = `rgba(30, 30, 30, ${this.density})`;
+                ctx.stroke();
+
+                // 绘制边缘晕染（更淡更宽）
+                ctx.beginPath();
+                ctx.moveTo(this.segments[0].x, this.segments[0].y);
+                for (let i = 1; i < this.segments.length; i++) {
+                    const curr = this.segments[i];
+                    const prev = this.segments[i - 1];
+                    const cpX = (prev.x + curr.x) / 2;
+                    const cpY = (prev.y + curr.y) / 2;
+                    ctx.quadraticCurveTo(prev.x, prev.y, cpX, cpY);
+                }
+                ctx.lineTo(this.segments[this.segments.length - 1].x, 
+                          this.segments[this.segments.length - 1].y);
+                
+                ctx.lineWidth = this.width * 2.5;
+                ctx.strokeStyle = `rgba(60, 60, 60, ${this.density * 0.3})`;
+                ctx.stroke();
+
+                ctx.restore();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005;
+            }
+        }
+
+        // 墨水爆发粒子 - 点击时爆开
+        class InkExplosion {
+            constructor(x, y, angle) {
+                this.x = x;
+                this.y = y;
+                this.vx = Math.cos(angle) * (2 + Math.random() * 3);
+                this.vy = Math.sin(angle) * (2 + Math.random() * 3);
+                this.radius = 2 + Math.random() * 3;
+                this.age = 0;
+                this.maxAge = 25 + Math.random() * 15;
+                this.density = 0.2 + Math.random() * 0.15;
+                this.gravity = 0.15;
+                this.friction = 0.95;
+            }
+
+            update() {
+                this.age++;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                this.density *= 0.92;
+                this.radius *= 0.97;
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(20, 20, 20, ${this.density})`;
+                ctx.fill();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005;
+            }
+        }
+
+        // 墨水旋涡粒子 - 旋转吸引
+        class InkVortex {
+            constructor(x, y, force) {
+                this.centerX = x;
+                this.centerY = y;
+                this.angle = Math.random() * Math.PI * 2;
+                this.radius = 30 + Math.random() * 40;
+                this.x = x + Math.cos(this.angle) * this.radius;
+                this.y = y + Math.sin(this.angle) * this.radius;
+                this.force = force;
+                this.age = 0;
+                this.maxAge = 40 + Math.random() * 20;
+                this.density = 0.15 + Math.random() * 0.1;
+                this.size = 2 + Math.random() * 2;
+            }
+
+            update() {
+                this.age++;
+                this.angle += 0.1 * this.force;
+                this.radius *= 0.96;
+                this.x = this.centerX + Math.cos(this.angle) * this.radius;
+                this.y = this.centerY + Math.sin(this.angle) * this.radius;
+                this.density *= 0.94;
+                this.size *= 0.98;
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(40, 40, 40, ${this.density})`;
+                ctx.fill();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005 || this.radius < 2;
+            }
+        }
+
+        // 墨水雨滴 - 从上方落下
+        class InkRaindrop {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vy = 2 + Math.random() * 4;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.length = 5 + Math.random() * 8;
+                this.age = 0;
+                this.maxAge = 60 + Math.random() * 30;
+                this.density = 0.1 + Math.random() * 0.08;
+            }
+
+            update() {
+                this.age++;
+                this.y += this.vy;
+                this.x += this.vx;
+                this.vy *= 1.02;
+                this.density *= 0.97;
+            }
+
+            draw(ctx) {
+                if (this.density < 0.01) return;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + this.vx * 2, this.y - this.length);
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = `rgba(60, 60, 60, ${this.density})`;
+                ctx.stroke();
+            }
+
+            isDead() {
+                return this.age > this.maxAge || this.density < 0.005 || this.y > window.innerHeight;
+            }
+        }
+
+        // 打字机效果
+        class Typewriter {
+            constructor(element, text, speed = 100, delay = 1000) {
+                this.element = element;
+                this.text = text;
+                this.speed = speed;
+                this.delay = delay;
+                this.index = 0;
+                this.isTyping = false;
+            }
+
+            start() {
+                setTimeout(() => {
+                    this.isTyping = true;
+                    this.type();
+                }, this.delay);
+            }
+
+            type() {
+                if (this.index < this.text.length) {
+                    this.element.textContent += this.text.charAt(this.index);
+                    this.index++;
+                    const randomSpeed = this.speed + (Math.random() - 0.5) * 40;
+                    setTimeout(() => this.type(), randomSpeed);
+                } else {
+                    setTimeout(() => {
+                        const cursor = document.getElementById('typewriter-cursor');
+                        if (cursor) cursor.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        }
+
+        // Certificate Data
+        const certData = {
+            education: {
+                title: '教育背景',
+                items: [
+                    { title: '本科学位证书', desc: '西安交通大学 · 智能制造工程专业', date: '2021.09 - 2025.06', preview: '毕业证书.jpg' },
+                    { title: '学士学位证', desc: '工学学士', date: '2025.06', preview: '学位证.jpg' },
+                    { title: '在校成绩单', desc: '平均分 84.44，专业前 20%', date: '2021-2025', preview: '成绩单.jpg' }
+                ]
+            },
+            language: {
+                title: '语言能力',
+                items: [
+                    { title: '雅思 IELTS', desc: '总分 7.0（听力 7.5 · 阅读 7.0 · 写作 6.5 · 口语 6.5）', date: '2024.03', preview: '雅思成绩单.jpg' },
+                    { title: '大学英语六级 CET-6', desc: '通过', date: '2022.06', preview: 'cet6.jpg' },
+                    { title: '大学英语四级 CET-4', desc: '通过', date: '2021.12', preview: 'cet4.jpg' }
+                ]
+            },
+            awards: {
+                title: '荣誉奖项',
+                items: [
+                    { title: '中国大学生工程实践与创新能力大赛', desc: '智能·环境道路赛道 国家级一等奖', date: '2024.11', preview: '工创大赛证书.jpg' },
+                    { title: 'RoboCup 机器人世界杯', desc: '家庭组比赛 国家级三等奖', date: '2024.05', preview: 'robocup证书.jpg' },
+                    { title: '省级大学生创新创业项目', desc: '首席负责人，项目结颜优秀', date: '2023.06', preview: '创新项目.jpg' },
+                    { title: '学业奖学金', desc: '校级奖学金', date: '2022-2024', preview: '奖学金.jpg' }
+                ]
+            },
+            work: {
+                title: '学生工作',
+                items: [
+                    { title: '机器人俱乐部 技术部长', desc: '负责机器人竞赛培训与技术支持', date: '2022.09 - 2024.06', preview: '机器人部.jpg' },
+                    { title: '学生会 科技部干事', desc: '组织科技类活动与比赛', date: '2022.09 - 2023.06', preview: '学生会.jpg' },
+                    { title: '班级学习委员', desc: '协助学习事务与资料整理', date: '2021.09 - 2022.06', preview: '学习委员.jpg' }
+                ]
+            }
+        };
+
+        // Certificate Panel Functions
+        function openCertPanel(type, event) {
+            const data = certData[type];
+            if (!data) return;
+
+            // 磁吸弹性效果
+            const card = event.currentTarget;
+            card.classList.add('magnetic-active');
+            
+            // 创建波纹效果
+            const rect = card.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const ripple = document.createElement('div');
+            ripple.className = 'highlight-card-ripple';
+            ripple.style.left = (x - 50) + 'px';
+            ripple.style.top = (y - 50) + 'px';
+            ripple.style.width = '100px';
+            ripple.style.height = '100px';
+            card.appendChild(ripple);
+
+            // 移除动画类
+            setTimeout(() => {
+                card.classList.remove('magnetic-active');
+                ripple.remove();
+            }, 500);
+
+            // 填充面板内容
+            document.getElementById('cert-panel-title').textContent = data.title;
+            document.getElementById('cert-panel-body').innerHTML = data.items.map((item, index) => `
+                <div class="cert-item" style="animation: slideInFromLeft 0.4s var(--ease-out-expo) ${index * 0.1}s both;">
+                    <div class="cert-item-title">${item.title}</div>
+                    <div class="cert-item-desc">${item.desc}</div>
+                    <div class="cert-item-date">${item.date}</div>
+                    <div class="cert-preview">
+                        <span>📷 ${item.preview}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // 打开面板
+            document.getElementById('cert-panel-backdrop').classList.add('active');
+            document.getElementById('cert-panel').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCertPanel() {
+            document.getElementById('cert-panel-backdrop').classList.remove('active');
+            document.getElementById('cert-panel').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Configuration
         const config = {
             projects: [
                 {
@@ -1228,9 +2087,6 @@
                     tags: ['Python', 'PyTorch', 'VLA', '具身智能', '机械臂控制'],
                     icon: '🦾',
                     award: null,
-                    // media 支持两种方式：
-                    // 1. 字符串数组（所有图片使用项目描述作为说明）
-                    // 2. 对象数组（每张图片自定义说明）
                     media: [
                         { src: '图片1.png', caption: 'VLA模型架构设计图，展示了视觉-语言-动作三模态的融合流程' },
                         { src: '图片8.png', caption: '机械臂实物部署测试，在真实环境中验证模型效果' }
@@ -1274,10 +2130,23 @@
                         { src: 'wind-turbine.jpg', caption: '主轴故障预测结果展示，剩余寿命预测精度达到90%以上' },
                         { src: 'wind-turbine3.jpg', caption: '三维建模展示风力发电机内部结构' }
                     ]
+                },
+                {
+                    title: 'Paper Insights · 学术助手',
+                    shortTitle: '学术助手',
+                    description: '一款智能学术论文分析工具，支持通过 DOI、ArXiv ID 或标题快速检索论文，利用 LLM 生成智能摘要与阅读建议，并对参考文献进行启发式排序。同时提供 Daily Knowledge Briefing 功能，聚合学术博客、行业资讯与技术社区动态，实现一站式科研信息获取。',
+                    tags: ['Next.js', 'TypeScript', 'Tailwind CSS', 'LLM', 'RSS', 'Vercel'],
+                    icon: '📚',
+                    award: null,
+                    media: [
+                        { src: 'paper-assistant-1.jpg', caption: 'Paper Insights 首页，支持 DOI、ArXiv ID 和论文标题多种检索方式' },
+                        { src: 'paper-assistant-2.jpg', caption: '论文分析结果页，展示 AI 生成的智能摘要与参考文献排序' },
+                        { src: 'paper-assistant-3.jpg', caption: 'Daily Knowledge Briefing 功能，聚合多源学术资讯并 AI 总结' }
+                    ]
                 }
             ],
             skills: [
-                { category: '编程语言', items: ['Python', 'C', 'MATLAB'] },
+                { category: '编程语言', items: ['Python', 'C/C++', 'MATLAB'] },
                 { category: '机器人 & AI', items: ['ROS2', 'PyTorch', 'OpenCV', 'VLA 模型'] },
                 { category: '硬件 & 工具', items: ['STM32', 'SolidWorks', 'Git', 'Linux'] }
             ]
@@ -1285,6 +2154,9 @@
 
         let currentProjectIndex = -1;
         let currentSlideIndex = 0;
+        let isInProjectsSection = false;
+        let lastScrollY = window.scrollY;
+        let scrollDirection = 'down';
 
         // Render Orbs
         function renderOrbs() {
@@ -1304,19 +2176,131 @@
             });
         }
 
+        // 双向滚动动画控制
+        function initBidirectionalScrollAnimation() {
+            const projectsSection = document.getElementById('projects');
+            const orbs = document.querySelectorAll('.project-orb');
+            
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+                lastScrollY = currentScrollY;
+            }, { passive: true });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const isIntersecting = entry.isIntersecting;
+                    const intersectionRatio = entry.intersectionRatio;
+                    
+                    if (isIntersecting && intersectionRatio > 0.15) {
+                        if (!isInProjectsSection) {
+                            isInProjectsSection = true;
+                            
+                            orbs.forEach(orb => {
+                                orb.classList.remove('roll-out-left', 'roll-out-right', 'visible');
+                            });
+                            
+                            if (scrollDirection === 'down') {
+                                orbs.forEach((orb, index) => {
+                                    setTimeout(() => {
+                                        orb.classList.add('roll-in');
+                                    }, index * 100);
+                                });
+                            } else {
+                                orbs.forEach((orb, index) => {
+                                    setTimeout(() => {
+                                        orb.classList.add('roll-in-left');
+                                    }, index * 100);
+                                });
+                            }
+                        }
+                    } else if (!isIntersecting && isInProjectsSection) {
+                        isInProjectsSection = false;
+                        
+                        if (scrollDirection === 'down') {
+                            orbs.forEach((orb, index) => {
+                                orb.classList.remove('roll-in', 'roll-in-left');
+                                setTimeout(() => {
+                                    orb.classList.add('roll-out-left');
+                                }, index * 80);
+                            });
+                        } else {
+                            orbs.forEach((orb, index) => {
+                                orb.classList.remove('roll-in', 'roll-in-left');
+                                setTimeout(() => {
+                                    orb.classList.add('roll-out-right');
+                                }, index * 80);
+                            });
+                        }
+                    }
+                });
+            }, {
+                threshold: [0, 0.15, 0.5, 1],
+                rootMargin: '-10% 0px -10% 0px'
+            });
+
+            observer.observe(projectsSection);
+        }
+
+        // 关于我区域浮现效果
+        function initAboutReveal() {
+            const aboutText = document.getElementById('about-text');
+            const aboutHighlights = document.getElementById('about-highlights');
+            const aboutHeader = document.getElementById('about-header');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target === aboutHeader) {
+                            aboutHeader.classList.add('visible');
+                        }
+                        if (entry.target === aboutText) {
+                            aboutText.classList.add('visible');
+                        }
+                        if (entry.target === aboutHighlights) {
+                            aboutHighlights.classList.add('visible');
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.2,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            if (aboutHeader) observer.observe(aboutHeader);
+            if (aboutText) observer.observe(aboutText);
+            if (aboutHighlights) observer.observe(aboutHighlights);
+        }
+
+        // Section headers 浮现效果
+        function initSectionHeadersReveal() {
+            const headers = document.querySelectorAll('.section-header');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.3,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            headers.forEach(header => observer.observe(header));
+        }
+
         // Open Side Panel
         function openPanel(index) {
             currentProjectIndex = index;
             currentSlideIndex = 0;
             const project = config.projects[index];
             
-            // Update panel content
             document.getElementById('panel-icon').textContent = project.icon;
             document.getElementById('panel-title').textContent = project.shortTitle || project.title;
             document.getElementById('panel-info-title').textContent = project.title;
             document.getElementById('panel-description').textContent = project.description;
             
-            // Award
             const awardEl = document.getElementById('panel-award');
             if (project.award) {
                 awardEl.textContent = '🏆 ' + project.award;
@@ -1325,14 +2309,11 @@
                 awardEl.style.display = 'none';
             }
             
-            // Tags
             document.getElementById('panel-tags').innerHTML = 
                 project.tags.map(tag => `<span class="project-panel-tag">${tag}</span>`).join('');
             
-            // Render carousel slides
             renderCarousel(project);
             
-            // Show panel
             document.getElementById('panel-backdrop').classList.add('active');
             document.getElementById('project-panel').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1355,7 +2336,6 @@
             const inner = document.getElementById('panel-carousel-inner');
             const dots = document.getElementById('panel-carousel-dots');
             
-            // Render slides
             inner.innerHTML = project.media.map((item, i) => {
                 const src = typeof item === 'string' ? item : item.src;
                 const caption = typeof item === 'string' ? project.description : (item.caption || project.description);
@@ -1374,7 +2354,6 @@
                 `;
             }).join('');
             
-            // Render dots
             if (project.media.length > 1) {
                 dots.innerHTML = project.media.map((_, i) => `
                     <div class="project-panel-carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
@@ -1413,7 +2392,7 @@
             updateCarousel();
         }
 
-        // Touch/Drag support for carousel
+        // Touch/Drag support
         let isDragging = false;
         let startX = 0;
 
@@ -1484,19 +2463,147 @@
             });
         }
 
-        // Close on escape key
+        // Close on escape
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closePanel();
+            if (e.key === 'Escape') {
+                closePanel();
+                closeCertPanel();
+            }
         });
 
         // Initialize
+        // 全局墨水系统引用
+        let inkSystem = null;
+
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth > 768) new MouseTrail();
+            const typewriterText = document.getElementById('typewriter-text');
+            if (typewriterText) {
+                new Typewriter(typewriterText, '智能制造工程 · 具身智能探索者', 80, 800).start();
+            }
+
+            // 启动水墨效果 - 仅在非触摸设备
+            if (window.innerWidth > 768 && !window.matchMedia('(pointer: coarse)').matches) {
+                inkSystem = new InkParticleSystem();
+                initInkInteractions();
+            }
+            
             renderOrbs();
             renderSkills();
+            initBidirectionalScrollAnimation();
+            initAboutReveal();
+            initSectionHeadersReveal();
             initMobileMenu();
             initSmoothScroll();
         });
+
+        // 墨水交互联动系统
+        function initInkInteractions() {
+            if (!inkSystem) return;
+
+            // 1. 项目球体滚动时濫起墨水尾迹
+            const orbsContainer = document.getElementById('projects-orbs');
+            if (orbsContainer) {
+                orbsContainer.addEventListener('mouseenter', (e) => {
+                    if (e.target.classList.contains('project-orb')) {
+                        const rect = e.target.getBoundingClientRect();
+                        const x = rect.left + rect.width / 2;
+                        const y = rect.top + rect.height / 2;
+                        inkSystem.vortex(x, y, 0.5);
+                    }
+                });
+            }
+
+            // 2. 卡片悬停吸引墨水
+            document.querySelectorAll('.highlight-card, .skill-category').forEach(card => {
+                card.addEventListener('mouseenter', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    inkSystem.vortex(rect.left + rect.width/2, rect.top + rect.height/2, 0.3);
+                });
+            });
+
+            // 3. 点击爆发墨水
+            document.addEventListener('click', (e) => {
+                // 排除按钮和输入框
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || 
+                    e.target.tagName === 'INPUT' || e.target.closest('.highlight-card')) {
+                    inkSystem.burst(e.clientX, e.clientY, 12, 80);
+                }
+            });
+
+            // 4. 打字时墨水跳动
+            const typewriterContainer = document.getElementById('typewriter-container');
+            const typewriterTextEl = document.getElementById('typewriter-text');
+            if (typewriterContainer && typewriterTextEl) {
+                let lastCharTime = 0;
+                const observer = new MutationObserver(() => {
+                    const now = Date.now();
+                    if (now - lastCharTime > 50) {
+                        const rect = typewriterContainer.getBoundingClientRect();
+                        inkSystem.rain(rect.right - 20, 60, 2);
+                        lastCharTime = now;
+                    }
+                });
+                observer.observe(typewriterTextEl, { childList: true });
+            }
+
+            // 5. 面杺打开时墨水被推开
+            const panelBackdrop = document.getElementById('panel-backdrop');
+            const certPanelBackdrop = document.getElementById('cert-panel-backdrop');
+            
+            [panelBackdrop, certPanelBackdrop].forEach(backdrop => {
+                if (backdrop) {
+                    backdrop.addEventListener('transitionend', (e) => {
+                        if (e.propertyName === 'opacity' && backdrop.classList.contains('active')) {
+                            const rect = backdrop.getBoundingClientRect();
+                            inkSystem.burst(rect.width / 2, window.innerHeight / 2, 16, 200);
+                        }
+                    });
+                }
+            });
+
+            // 6. 滚动加速墨水生成
+            let lastScrollY = window.scrollY;
+            let scrollTimeout;
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+                
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    lastScrollY = currentScrollY;
+                }, 100);
+
+                // 快速滚动时产生墨水流
+                if (scrollDelta > 50 && Math.random() > 0.7) {
+                    const x = Math.random() * window.innerWidth;
+                    const y = currentScrollY > lastScrollY ? -10 : window.innerHeight + 10;
+                    inkSystem.rain(x, 0, 3);
+                }
+            }, { passive: true });
+
+            // 7. 证书面板弹出时墨水入场
+            document.querySelectorAll('.highlight-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    // 先爆发后旋涡
+                    inkSystem.burst(centerX, centerY, 8, 50);
+                    setTimeout(() => {
+                        inkSystem.vortex(centerX, centerY, 1);
+                    }, 100);
+                });
+            });
+
+            // 8. 导航链接悬停
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('mouseenter', (e) => {
+                    const rect = link.getBoundingClientRect();
+                    inkSystem.rain(rect.left + rect.width/2, 20, 1);
+                });
+            });
+        }
     </script>
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "57054d8dba9c482b9769cc7512c49a08"}'></script>
