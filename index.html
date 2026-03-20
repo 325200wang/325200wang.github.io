@@ -169,6 +169,38 @@
             max-width: 980px;
         }
 
+        /* Apple Watch 风格双偏心时钟背景 */
+        .clock-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .clock-bg svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* 白色分钟环 - 向左移动150 */
+        .minute-ring {
+            transform-origin: -650px 700px;
+            transition: transform 0.1s linear;
+        }
+
+        /* 橙色秒环 - 向左移动150 */
+        .second-ring {
+            transform-origin: 1050px 800px;
+            transition: transform 0.05s linear;
+        }
+
+
+
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -1347,6 +1379,7 @@
             .project-orb { width: 150px; height: 150px; }
             .project-orb-icon { font-size: 44px; }
             .project-panel { max-width: 600px; }
+            .clock-bg { width: 500px; height: 500px; }
         }
 
         @media (max-width: 768px) {
@@ -1373,6 +1406,7 @@
             .hero-subtitle { font-size: 21px; }
             .hero-description { font-size: 17px; }
             .hero-stats { flex-direction: column; gap: 24px; }
+            .clock-bg { width: 350px; height: 350px; opacity: 0.7; }
 
             .section { padding: 80px 0; }
             .section-title { font-size: 32px; }
@@ -1450,6 +1484,74 @@
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="hero-content">
+            <!-- Apple Watch 风格双偏心时钟背景 -->
+            <div class="clock-bg">
+                <svg viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- 白色分钟环的路径 - 大圆，偏右下 -->
+                        <path id="minutePath" d="M 1040,600 A 440,440 0 1,1 160,600 A 440,440 0 1,1 1040,600" fill="none"/>
+                        <!-- 橙色秒环的路径 - 大圆，偏左上 -->
+                        <path id="secondPath" d="M 960,560 A 360,360 0 1,1 240,560 A 360,360 0 1,1 960,560" fill="none"/>
+                    </defs>
+                    
+                    <!-- 白色分钟环（向左移动150） -->
+                    <g class="minute-ring" id="minuteRing">
+                        <!-- 环背景 -->
+                        <circle cx="-650" cy="700" r="720" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="150"/>
+                        <circle cx="-650" cy="700" r="720" fill="none" stroke="rgba(200,200,200,0.3)" stroke-width="150"/>
+                        
+                        <!-- 分钟刻度数字 01-60 -->
+                        <g id="minuteNumbers" fill="#333" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="42" font-weight="500">
+                            <!-- 数字将通过 JS 动态生成 -->
+                        </g>
+                        
+                        <!-- 分钟刻度线 -->
+                        <g id="minuteTicks" stroke="#666" stroke-width="4.5">
+                            <!-- 刻度线将通过 JS 动态生成 -->
+                        </g>
+                        
+                    </g>
+                    
+                    <!-- 分钟指针 B点 - 固定在9点钟方向，不随环转动 -->
+                    <g id="minuteHandB">
+                        <!-- 指针从环外侧指向刻度方向 -->
+                        <line x1="-370" y1="200" x2="-310" y2="100" stroke="#1d1d1f" stroke-width="12" stroke-linecap="round"/>
+                       
+                       
+                        <!-- 指针根部圆点 -->
+                        <circle cx="-370" cy="200" r="18" fill="rgba(255,255,255,0.8)" stroke="#1d1d1f" stroke-width="3"/>
+                    </g>
+                    
+                    <!-- 橙色秒环（向左移动150） -->
+                    <g class="second-ring" id="secondRing">
+                        <!-- 环背景 -->
+                        <circle cx="1050" cy="800" r="1200" fill="none" stroke="#D4824A" stroke-width="135"/>
+                        <circle cx="1050" cy="800" r="1200" fill="none" stroke="rgba(180,100,50,0.3)" stroke-width="135"/>
+                        
+                        <!-- 秒钟刻度数字 01-60 -->
+                        <g id="secondNumbers" fill="#fff" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="36" font-weight="500">
+                            <!-- 数字将通过 JS 动态生成 -->
+                        </g>
+                        
+                        <!-- 秒钟刻度线 -->
+                        <g id="secondTicks" stroke="#fff" stroke-width="3">
+                            <!-- 刻度线将通过 JS 动态生成 -->
+                        </g>
+                        
+                    </g>
+                    
+                    <!-- 秒钟指针 A点 - 固定在3点钟方向，不随环转动 -->
+                    <g id="secondHandA">
+                        <!-- 指针从环外侧指向刻度方向 -->
+                        <line x1="-300" y1="700" x2="-150" y2="700" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+
+                        <!-- 指针根部圆点 -->
+                        <circle cx="-300" cy="700" r="18" fill="#D4824A" stroke="#fff" stroke-width="4"/>
+                    </g>
+                    
+                </svg>
+            </div>
+            
             <div class="hero-badge">正在寻找实习机会</div>
             <h1 class="hero-title">王昱程</h1>
             
@@ -3064,6 +3166,135 @@
                 });
             });
         }
+
+        // ==========================================
+        // Apple Watch 风格双偏心时钟
+        // ==========================================
+        (function initClock() {
+            const minuteRing = document.getElementById('minuteRing');
+            const secondRing = document.getElementById('secondRing');
+            const minuteNumbers = document.getElementById('minuteNumbers');
+            const secondNumbers = document.getElementById('secondNumbers');
+            const minuteTicks = document.getElementById('minuteTicks');
+            const secondTicks = document.getElementById('secondTicks');
+
+            if (!minuteRing || !secondRing) return;
+
+            // 生成分钟环刻度（中心 -650,700，半径 720）
+            function generateMinuteTicks() {
+                const centerX = -650, centerY = 700, radius = 750;
+                let numbersHTML = '';
+                let ticksHTML = '';
+
+                for (let i = 0; i < 60; i++) {
+                    const angle = (i * 6 - 90) * Math.PI / 180; // -90 从12点开始
+                    
+                    // 数字位置（在环内侧）
+                    const numRadius = radius - 54;
+                    const numX = centerX + Math.cos(angle) * numRadius;
+                    const numY = centerY + Math.sin(angle) * numRadius;
+                    const num = i === 0 ? '60' : String(i).padStart(2, '0');
+                    
+                    // 数字旋转角度，使其沿切线方向
+                    const rotateAngle = i * 6;
+                    numbersHTML += `<text x="${numX}" y="${numY}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rotateAngle}, ${numX}, ${numY})">${num}</text>`;
+
+                    // 刻度线
+                    const tickInnerR = radius - 96;
+                    const tickOuterR = radius - 78;
+                    const tickX1 = centerX + Math.cos(angle) * tickInnerR;
+                    const tickY1 = centerY + Math.sin(angle) * tickInnerR;
+                    const tickX2 = centerX + Math.cos(angle) * tickOuterR;
+                    const tickY2 = centerY + Math.sin(angle) * tickOuterR;
+                    const strokeWidth = i % 5 === 0 ? 7.5 : 4.5;
+                    ticksHTML += `<line x1="${tickX1}" y1="${tickY1}" x2="${tickX2}" y2="${tickY2}" stroke-width="${strokeWidth}"/>`;
+                }
+
+                minuteNumbers.innerHTML = numbersHTML;
+                minuteTicks.innerHTML = ticksHTML;
+            }
+
+            // 生成秒环刻度（中心 1050,800，半径 1200）
+            function generateSecondTicks() {
+                const centerX = 1050, centerY = 800, radius = 1230;
+                let numbersHTML = '';
+                let ticksHTML = '';
+
+                for (let i = 0; i < 60; i++) {
+                    const angle = (i * 6 - 90) * Math.PI / 180;
+                    
+                    // 数字位置
+                    const numRadius = radius - 48;
+                    const numX = centerX + Math.cos(angle) * numRadius;
+                    const numY = centerY + Math.sin(angle) * numRadius;
+                    const num = i === 0 ? '60' : String(i).padStart(2, '0');
+                    
+                    const rotateAngle = i * 6;
+                    numbersHTML += `<text x="${numX}" y="${numY}" text-anchor="middle" dominant-baseline="middle" transform="rotate(${rotateAngle}, ${numX}, ${numY})">${num}</text>`;
+
+                    // 刻度线
+                    const tickInnerR = radius - 84;
+                    const tickOuterR = radius - 69;
+                    const tickX1 = centerX + Math.cos(angle) * tickInnerR;
+                    const tickY1 = centerY + Math.sin(angle) * tickInnerR;
+                    const tickX2 = centerX + Math.cos(angle) * tickOuterR;
+                    const tickY2 = centerY + Math.sin(angle) * tickOuterR;
+                    const strokeWidth = i % 5 === 0 ? 6 : 3;
+                    ticksHTML += `<line x1="${tickX1}" y1="${tickY1}" x2="${tickX2}" y2="${tickY2}" stroke-width="${strokeWidth}"/>`;
+                }
+
+                secondNumbers.innerHTML = numbersHTML;
+                secondTicks.innerHTML = ticksHTML;
+            }
+
+            // 起始时间戳，用于平滑旋转
+            let startTimestamp = null;
+            let initialSecondAngle = 0;
+            
+            // 指针位置计算的角度（相对于各自环心）
+            // 秒针A点(-300,700)相对于秒环心(1050,800): atan2(-100, -1350) ≈ -175.76度
+            const SECOND_HAND_ANGLE = -175.76;
+            // 分针B点(-310,100)相对于分环心(-650,700): atan2(-600, 340) ≈ -60.5度  
+            const MINUTE_HAND_ANGLE = -60.5;
+            
+            // 更新时钟
+            function updateClock(timestamp) {
+                if (!startTimestamp) {
+                    startTimestamp = timestamp;
+                    // 初始化角度：让当前秒数对准A点指针
+                    const now = new Date();
+                    const ms = now.getMilliseconds();
+                    const s = now.getSeconds();
+                    initialSecondAngle = SECOND_HAND_ANGLE - (s * 6 + ms * 0.006);
+                }
+
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                const milliseconds = now.getMilliseconds();
+
+                // === 秒环平滑连续旋转 ===
+                // 基于时间计算总角度，避免跳变，每秒6度
+                const elapsedMs = timestamp - startTimestamp;
+                const rotationDegrees = (elapsedMs / 1000) * 6; // 每秒6度
+                const secondAngle = initialSecondAngle - rotationDegrees;
+                secondRing.style.transform = `rotate(${secondAngle}deg)`;
+
+                // === 分钟环旋转 ===
+                // 让当前分钟刻度对准B点指针
+                const minuteAngle = MINUTE_HAND_ANGLE - (minutes * 6 + seconds * 0.1);
+                minuteRing.style.transform = `rotate(${minuteAngle}deg)`;
+
+                // 中心时钟指针
+                requestAnimationFrame(updateClock);
+            }
+
+            // 初始化
+            generateMinuteTicks();
+            generateSecondTicks();
+            requestAnimationFrame(updateClock);
+        })();
     </script>
     <!-- Cloudflare Web Analytics -->
     <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "57054d8dba9c482b9769cc7512c49a08"}'></script>
