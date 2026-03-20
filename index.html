@@ -3251,11 +3251,11 @@
             let startTimestamp = null;
             let initialSecondAngle = 0;
             
-            // 指针位置计算的角度（相对于各自环心）
-            // 秒针A点(-300,700)相对于秒环心(1050,800): atan2(-100, -1350) ≈ -175.76度
-            const SECOND_HAND_ANGLE = -175.76;
-            // 分针B点(-310,100)相对于分环心(-650,700): atan2(-600, 340) ≈ -60.5度  
-            const MINUTE_HAND_ANGLE = -60.5;
+            // 指针位置计算精确角度（基于指针头部相对于环心）
+            // 秒针：头部(-150,700)，环心(1050,800) → dx=-1200, dy=-100 → atan2(-100,-1200)=-85.24°
+            const SECOND_HAND_ANGLE = -85.24;
+            // 分针：头部(-310,100)，环心(-650,700) → dx=340, dy=-600 → atan2(-600,340)=-60.54°
+            const MINUTE_HAND_ANGLE = 29.46;
             
             // 更新时钟
             function updateClock(timestamp) {
