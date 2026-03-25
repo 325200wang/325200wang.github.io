@@ -175,10 +175,29 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
+            width: min(85vh, 85vw);
+            height: min(85vh, 85vw);
+            max-width: 700px;
+            max-height: 700px;
             z-index: -1;
             pointer-events: none;
+        }
+
+        /* 超大屏幕：圆环更大更震撼 */
+        @media (min-width: 1440px) {
+            .clock-bg {
+                max-width: 850px;
+                max-height: 850px;
+                opacity: 1;
+            }
+        }
+
+        /* 大屏幕显示器适配 */
+        @media (min-width: 1920px) {
+            .clock-bg {
+                max-width: 1000px;
+                max-height: 1000px;
+            }
         }
 
         .clock-bg svg {
@@ -187,15 +206,16 @@
             overflow: visible;
         }
 
-        /* 白色分钟环 - 向左移动150 */
+        /* 白色分钟环和橙色秒环 - 使用 view-box 坐标系 */
         .minute-ring {
             transform-origin: -650px 700px;
+            transform-box: view-box;
             transition: transform 0.1s linear;
         }
 
-        /* 橙色秒环 - 向左移动150 */
         .second-ring {
             transform-origin: 1050px 800px;
+            transform-box: view-box;
             transition: transform 0.05s linear;
         }
 
@@ -1379,7 +1399,13 @@
             .project-orb { width: 150px; height: 150px; }
             .project-orb-icon { font-size: 44px; }
             .project-panel { max-width: 600px; }
-            .clock-bg { width: 500px; height: 500px; }
+            .clock-bg { 
+                width: min(80vh, 80vw);
+                height: min(80vh, 80vw);
+                max-width: 550px;
+                max-height: 550px;
+                opacity: 0.85;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1402,11 +1428,19 @@
             .mobile-menu-btn { display: block; }
 
             .hero { padding: 100px 24px 60px; }
-            .hero-title { font-size: 64px; }
-            .hero-subtitle { font-size: 21px; }
-            .hero-description { font-size: 17px; }
-            .hero-stats { flex-direction: column; gap: 24px; }
-            .clock-bg { width: 350px; height: 350px; opacity: 0.7; }
+            .hero-title { font-size: 56px; }
+            .hero-subtitle { font-size: 18px; min-height: 32px; }
+            .typewriter-cursor { height: 22px; }
+            .hero-description { font-size: 16px; max-width: 100%; }
+            .hero-stats { flex-direction: row; gap: 24px; margin-top: 48px; padding-top: 32px; }
+            .hero-stat-number { font-size: 36px; }
+            .clock-bg { 
+                width: min(95vw, 400px);
+                height: min(95vw, 400px);
+                max-width: 400px;
+                max-height: 400px;
+                opacity: 0.5;
+            }
 
             .section { padding: 80px 0; }
             .section-title { font-size: 32px; }
@@ -1440,10 +1474,10 @@
                 100% { opacity: 0; transform: translateX(-30vw) rotate(-180deg); }
             }
 
-            .projects-orbs { gap: 20px; }
-            .project-orb { width: 130px; height: 130px; }
-            .project-orb-icon { font-size: 36px; }
-            .project-orb-title { font-size: 11px; }
+            .projects-orbs { gap: 16px; padding: 20px 0; }
+            .project-orb { width: 100px; height: 100px; }
+            .project-orb-icon { font-size: 32px; margin-bottom: 4px; }
+            .project-orb-title { font-size: 10px; padding: 0 8px; }
 
             .project-panel { max-width: 100%; }
             .project-panel-image-wrapper { min-height: 150px; max-height: 300px; }
@@ -1457,6 +1491,37 @@
             .projects-container { padding: 0 20px; }
 
             #ink-canvas { display: none; }
+        }
+        
+        /* 超小屏幕进一步优化 */
+        @media (max-width: 480px) {
+            .clock-bg {
+                width: min(90vw, 360px);
+                height: min(90vw, 360px);
+                opacity: 0.4;
+            }
+            .hero-title { font-size: 52px; }
+            .hero-subtitle { font-size: 16px; }
+            .hero-description { font-size: 15px; }
+            .project-orb { width: 90px; height: 90px; }
+            .project-orb-icon { font-size: 30px; }
+            .projects-orbs { gap: 14px; }
+        }
+        
+        @media (max-width: 380px) {
+            .clock-bg {
+                width: 300px;
+                height: 300px;
+                opacity: 0.35;
+            }
+            .hero-title { font-size: 44px; }
+            .hero-subtitle { font-size: 15px; }
+            .project-orb { width: 80px; height: 80px; }
+            .project-orb-icon { font-size: 26px; }
+            .project-orb-title { font-size: 9px; }
+            .projects-orbs { gap: 10px; }
+            .hero-stats { flex-direction: column; gap: 16px; }
+            .hero-stat-number { font-size: 28px; }
         }
     </style>
 </head>
@@ -3177,6 +3242,7 @@
             const secondNumbers = document.getElementById('secondNumbers');
             const minuteTicks = document.getElementById('minuteTicks');
             const secondTicks = document.getElementById('secondTicks');
+            const clockBg = document.querySelector('.clock-bg');
 
             if (!minuteRing || !secondRing) return;
 
